@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script>
+    function addMsg(text)
+    {
+      var p = document.createElement('p');
+      p.innerText = text;
+      document.querySelector('#msgs').appendChild(p);
+    }
+
+    var init = false;
+    document.addEventListener('frame-courier-ready', function (e)
+    {
+      if(init)
+      {
+        return;
+      }
+      init = true;
+      document.querySelector('#txt').innerText = 'this frame has courier ' + e.detail.name;
+
+      FrameCourier.addActionListener('myaction', function (pl, respond)
+      {
+        addMsg('received message ' + JSON.stringify(pl));
+        respond('thanks from ' + e.detail.name);
+      });
+    });
+  </script>
+  <script src="/build/frame-courier.min.js"></script>
+</head>
+<body>
+<div id="txt">this frame has courier</div>
+<div>Target: <input id="target" type="text"/></div>
+<div>Message: <input id="msg" type="text"/></div>
+<button id="sendbtn">Send</button>
+<hr/>
+<div id="msgs"></div>
+<script>
+  document.querySelector('#sendbtn').addEventListener('click', function ()
+  {
+    FrameCourier.sendMessage(
+      document.querySelector('#target').value,
+      'myaction',
+      document.querySelector('#msg').value,
+      function (pl)
+      {
+        addMsg('received response ' + JSON.stringify(pl));
+      }
+    )
+  });
+</script>
+</body>
+</html>

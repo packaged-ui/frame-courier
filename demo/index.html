@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script src="/build/frame-courier.min.js"></script>
+  <script>
+    FrameCourier.addActionListener('myaction', function (pl, respond)
+    {
+      alert('top frame received message ' + JSON.stringify(pl));
+      respond('thanks from top frame');
+    });
+  </script>
+</head>
+<body>
+
+<button id="addnew">Add new frame</button>
+<button id="addnormal">Add normal frame</button>
+<div id="frames"></div>
+
+<script>
+  document.querySelector('#addnew').addEventListener('click', function ()
+  {
+    let ifr = document.createElement('iframe');
+    ifr.setAttribute('courier-name', 'frame-' + Math.abs(Math.floor(Math.random() * 1000)));
+    ifr.setAttribute('src', 'http://localhost:8011/demo/courierFrame.html');
+    document.querySelector('#frames').appendChild(ifr);
+  });
+  document.querySelector('#addnormal').addEventListener('click', function ()
+  {
+    let ifr = document.createElement('iframe');
+    ifr.setAttribute('src', 'http://localhost:8011/demo/normalFrame.html');
+    document.querySelector('#frames').insertBefore(ifr, document.querySelector('#frames').firstChild);
+  });
+</script>
+</body>
+</html>
