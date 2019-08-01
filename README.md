@@ -20,12 +20,12 @@ FrameCourier.addActionListener(
   function(payload) { alert(payload); }
 );
 ```
-#### Listeners
+#### Sending Messages
 
 ```javascript
 FrameCourier.sendMessage(
-  '',
-  'my action',
-  function(payload) { alert(payload); }
+  'myframe',     // target frame name
+  'my action',   // action (listener)
+  'my message'   // payload
 );
 ```
