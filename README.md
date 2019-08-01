@@ -3,7 +3,10 @@
 High level interface to window.postMessage.
 This package makes it easy to send and receive secure messages cross-origin.
 
+### Basic Usage
+
 #### Frames
+
 FrameCourier requires frames to be named.  This name will be used as the target of communication of `FrameCourier.sendMessage`
 
 ```html
@@ -20,6 +23,7 @@ FrameCourier.addActionListener(
   function(payload) { alert(payload); }
 );
 ```
+
 #### Sending Messages
 
 ```javascript
@@ -27,5 +31,27 @@ FrameCourier.sendMessage(
   'myframe',     // target frame name
   'my action',   // action (listener)
   'my message'   // payload
+);
+```
+
+### Advanced Usage
+
+#### Bidirectional communication
+
+Use built in response callbacks to send messages back to the originating frame.
+
+```javascript
+FrameCourier.addActionListener(
+  'my action',
+  function(payload, respond) { alert(payload); respond('response payload'); }
+);
+```
+
+```javascript
+FrameCourier.sendMessage(
+  'myframe',     // target frame name
+  'my action',   // action (listener)
+  'my message',  // payload
+  function(responsePayload) { alert('got response: ' + responsePayload); }
 );
 ```
