@@ -1,5 +1,3 @@
-import {hashCode} from "./helpers";
-
 let _frameName = null;
 let _frames = {};
 if(window === window.top)
@@ -37,7 +35,7 @@ function addFrame(name, id, origin)
 function _getEnvelope(event, to, toOrigin, payload)
 {
   return {
-    messageId: event + ':' + hashCode(Date.now() + to + payload),
+    messageId: event + ':' + _hashCode(Date.now() + to + payload),
     event: event,
     to: to,
     toOrigin: toOrigin,
@@ -60,7 +58,14 @@ export function sendMessage(frameName, event, payload, callback)
   {
     const envelope = _getEnvelope(event, frameName, frm.origin, payload);
     const targetWindow = frm.id < 0 ? window.top : window.top.frames[frm.id];
-    _sendWindowMessage(targetWindow, frm.origin, envelope, callback);
+    if(targetWindow)
+    {
+      _sendWindowMessage(targetWindow, frm.origin, envelope, callback);
+    }
+    else
+    {
+      console.warn('target has been removed');
+    }
   }
   else
   {
@@ -130,7 +135,7 @@ export function addListener(event, callback)
 
 function _getResponseEvent(messageId)
 {
-  return events.MESSAGE_RESPONSE + ':' + hashCode(messageId);
+  return events.MESSAGE_RESPONSE + ':' + _hashCode(messageId);
 }
 
 if(window === window.top)
@@ -239,7 +244,7 @@ if(window === window.top)
         }
       });
 
-    const frameHash = hashCode(JSON.stringify(_frames));
+    const frameHash = _hashCode(JSON.stringify(_frames));
 
     Object.keys(_frames)
           .filter((name) => _frames[name].origin) // don't send init to main frame
@@ -263,7 +268,7 @@ else
   let ready = false;
   addListener(events.PROBE, (pl, respond) =>
   {
-    const currentHash = hashCode(JSON.stringify(_frames));
+    const currentHash = _hashCode(JSON.stringify(_frames));
     const spl = pl.split(' ', 2);
 
     if(currentHash === spl[1])
@@ -286,4 +291,20 @@ else
       }
     );
   });
+}
+
+function _hashCode(str)
+{
+  let hash = 0, i, chr;
+  if(str.length === 0)
+  {
+    return hash;
+  }
+  for(i = 0; i < str.length; i++)
+  {
+    chr = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + chr;
+    hash |= 0; // Convert to 32bit integer
+  }
+  return String(hash);
 }

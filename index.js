@@ -1,4 +1,4 @@
-import {addListener, getName, sendMessage} from "./frames";
+import {addListener, getName, sendMessage} from "./src/frames";
 
 export default {
   listen: addListener,

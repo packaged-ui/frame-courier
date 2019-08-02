@@ -1,7 +1,7 @@
 {
   "name": "@packaged-ui/frame-courier",
-  "version": "1.1.0",
-  "main": "src/index.js",
+  "version": "1.1.1",
+  "main": "index.js",
   "author": {
     "name": "Tom Kay",
     "email": "oridan82@gmail.com",

@@ -1,3 +1,3 @@
-import FrameCourier from './src/index';
+import FrameCourier from './index';
 
 window.FrameCourier = FrameCourier;
