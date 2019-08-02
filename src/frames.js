@@ -9,8 +9,9 @@ if(window === window.top)
 }
 
 const events = {
-  READY: '_ready', // iframe notifies top that it is ready
+  LOADED: '_loaded', // iframe notifies top that it has loaded the script
   PROBE: '_probe', // handshake with frame to see if it accepts messages
+  READY: '_ready', // iframe notifies top that it has been initialized and is ready to receive messages
   MESSAGE_RESPONSE: '_message_response',
 };
 
@@ -183,7 +184,7 @@ if(window === window.top)
 
   // listen to ready messages
   addListener(
-    events.READY,
+    events.LOADED,
     (payload, response, src, origin) =>
     {
       // build frames
@@ -253,7 +254,7 @@ if(window === window.top)
 }
 else
 {  // send probe to top
-  _sendWindowMessage(window.top, '*', _getEnvelope(events.READY, '', '*', 'hello'));
+  _sendWindowMessage(window.top, '*', _getEnvelope(events.LOADED, '', '*', 'hello'));
 
   let ready = false;
   addListener(events.PROBE, (pl, respond) =>
@@ -275,7 +276,8 @@ else
         if(!ready)
         {
           ready = true;
-          document.dispatchEvent(new CustomEvent('frame-courier-ready', {detail: {name: _frameName}}))
+          document.dispatchEvent(new CustomEvent('frame-courier-ready', {detail: {name: _frameName}}));
+          sendMessage('', events.READY, _frameName)
         }
       }
     );
