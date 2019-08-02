@@ -137,28 +137,32 @@ if(window === window.top)
 { // listen for iframe deletions
   if(window.MutationObserver)
   {
-    var observer = new MutationObserver(
-      (mutations) =>
-      {
-        // check for removed target
-        mutations.forEach(
-          (mutation) =>
-          {
-            const nodes = Array.from(mutation.removedNodes);
-            nodes.forEach(
-              (node) =>
-              {
-                _iframesRemoved((node.matches('iframe')) ? [node] : node.querySelectorAll('iframe'));
-              });
-          });
-      });
-    observer.observe(document, {subtree: true, childList: true});
+    (new MutationObserver(
+        (mutations) =>
+        {
+          // check for removed target
+          mutations.forEach(
+            (mutation) =>
+            {
+              Array.from(mutation.removedNodes)
+                   .filter((node) => node.nodeType === Node.ELEMENT_NODE)
+                   .forEach(
+                     (node) =>
+                     {
+                       _iframesRemoved((node.matches('iframe')) ? [node] : node.querySelectorAll('iframe'));
+                     });
+            });
+        })
+    ).observe(document, {subtree: true, childList: true});
   }
   else
   {
     document.addEventListener('DOMNodeRemoved', function (e)
     {
-      _iframesRemoved((e.target.matches('iframe')) ? [e.target] : e.target.querySelectorAll('iframe'));
+      if(e.target.nodeType === Node.ELEMENT_NODE)
+      {
+        _iframesRemoved((e.target.matches('iframe')) ? [e.target] : e.target.querySelectorAll('iframe'));
+      }
     });
   }
 
