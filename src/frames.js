@@ -8,7 +8,7 @@ if(window === window.top)
   addFrame(_frameName, -1, window.origin, true);
 }
 
-const actions = {
+const events = {
   READY: '_ready', // iframe notifies top that it is ready
   PROBE: '_probe', // handshake with frame to see if it accepts messages
   MESSAGE_RESPONSE: '_message_response',
@@ -33,11 +33,11 @@ function addFrame(name, id, origin)
   }
 }
 
-function _getEnvelope(action, to, toOrigin, payload)
+function _getEnvelope(event, to, toOrigin, payload)
 {
   return {
-    messageId: action + ':' + hashCode(Date.now() + to + payload),
-    action: action,
+    messageId: event + ':' + hashCode(Date.now() + to + payload),
+    event: event,
     to: to,
     toOrigin: toOrigin,
     from: _frameName,
@@ -46,18 +46,18 @@ function _getEnvelope(action, to, toOrigin, payload)
   };
 }
 
-export function getFrameName()
+export function getName()
 {
   return _frameName;
 }
 
 // send messages
-export function sendMessage(frameName, action, payload, callback)
+export function sendMessage(frameName, event, payload, callback)
 {
   const frm = _frames[frameName];
   if(frm)
   {
-    const envelope = _getEnvelope(action, frameName, frm.origin, payload);
+    const envelope = _getEnvelope(event, frameName, frm.origin, payload);
     const targetWindow = frm.id < 0 ? window.top : window.top.frames[frm.id];
     _sendWindowMessage(targetWindow, frm.origin, envelope, callback);
   }
@@ -71,7 +71,7 @@ function _sendWindowMessage(targetWindow, origin, envelope, callback)
 {
   if(callback)
   {
-    addActionListener(_getResponseAction(envelope.messageId), callback);
+    addListener(_getResponseEvent(envelope.messageId), callback);
   }
   targetWindow.postMessage(JSON.stringify(envelope), origin);
 }
@@ -90,24 +90,24 @@ window.addEventListener('message', (msg) =>
     {
       return;
     }
-    if(['action', 'to', 'toOrigin', 'from', 'fromOrigin', 'payload'].every((value) => envelope.hasOwnProperty(value)))
+    if(['event', 'to', 'toOrigin', 'from', 'fromOrigin', 'payload'].every((value) => envelope.hasOwnProperty(value)))
     {
       // is this definitely for me?
       if(((envelope.toOrigin === '*') || envelope.toOrigin === window.origin) && (_frameName === null || _frameName === envelope.to))
       {
-        if(listeners.hasOwnProperty(envelope.action))
+        if(listeners.hasOwnProperty(envelope.event))
         {
           const responseCallback = (responsePayload, cb) =>
           {
             const responseEnvelope = _getEnvelope(
-              _getResponseAction(envelope.messageId),
+              _getResponseEvent(envelope.messageId),
               envelope.from,
               envelope.fromOrigin,
               responsePayload
             );
             _sendWindowMessage(msg.source, msg.origin, responseEnvelope, cb);
           };
-          listeners[envelope.action].forEach(
+          listeners[envelope.event].forEach(
             (callback) =>
             {
               callback(envelope.payload, responseCallback, msg.source, msg.origin);
@@ -118,18 +118,18 @@ window.addEventListener('message', (msg) =>
   }
 });
 
-export function addActionListener(action, callback)
+export function addListener(event, callback)
 {
-  if(!listeners.hasOwnProperty(action))
+  if(!listeners.hasOwnProperty(event))
   {
-    listeners[action] = [];
+    listeners[event] = [];
   }
-  listeners[action].push(callback);
+  listeners[event].push(callback);
 }
 
-function _getResponseAction(messageId)
+function _getResponseEvent(messageId)
 {
-  return actions.MESSAGE_RESPONSE + ':' + hashCode(messageId);
+  return events.MESSAGE_RESPONSE + ':' + hashCode(messageId);
 }
 
 if(window === window.top)
@@ -182,8 +182,8 @@ if(window === window.top)
   }
 
   // listen to ready messages
-  addActionListener(
-    actions.READY,
+  addListener(
+    events.READY,
     (payload, response, src, origin) =>
     {
       // build frames
@@ -241,7 +241,7 @@ if(window === window.top)
           .forEach(
             (name) =>
             {
-              sendMessage(name, actions.PROBE, 'hello ' + frameHash, (pl, respond) =>
+              sendMessage(name, events.PROBE, 'hello ' + frameHash, (pl, respond) =>
               {
                 if(pl === 'send ' + frameHash)
                 { // send init
@@ -253,9 +253,10 @@ if(window === window.top)
 }
 else
 {  // send probe to top
-  _sendWindowMessage(window.top, '*', _getEnvelope(actions.READY, '', '*', 'hello'));
+  _sendWindowMessage(window.top, '*', _getEnvelope(events.READY, '', '*', 'hello'));
 
-  addActionListener(actions.PROBE, (pl, respond) =>
+  let ready = false;
+  addListener(events.PROBE, (pl, respond) =>
   {
     const currentHash = hashCode(JSON.stringify(_frames));
     const spl = pl.split(' ', 2);
@@ -271,7 +272,11 @@ else
       {
         _frameName = initPayload.name;
         _frames = initPayload.frames;
-        document.dispatchEvent(new CustomEvent('frame-courier-ready', {detail: {name: _frameName}}))
+        if(!ready)
+        {
+          ready = true;
+          document.dispatchEvent(new CustomEvent('frame-courier-ready', {detail: {name: _frameName}}))
+        }
       }
     );
   });

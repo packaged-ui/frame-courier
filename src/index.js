@@ -1,7 +1,7 @@
-import {addActionListener, getFrameName, sendMessage} from "./frames";
+import {addListener, getName, sendMessage} from "./frames";
 
 export default {
-  addActionListener: addActionListener,
-  sendMessage: sendMessage,
-  getFrameName: getFrameName,
+  listen: addListener,
+  send: sendMessage,
+  name: getName,
 };

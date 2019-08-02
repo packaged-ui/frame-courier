@@ -5,9 +5,9 @@ import commonjs from 'rollup-plugin-commonjs';
 process.chdir(__dirname);
 
 const defaultCfg = {
-  input: './index.js',
+  input: './dist.js',
   output: {
-    file: './build/frame-courier.min.js',
+    file: './dist/frame-courier.min.js',
     name: 'FrameCourier',
     format: 'iife'
   },

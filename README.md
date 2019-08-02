@@ -18,8 +18,8 @@ FrameCourier requires frames to be named.  This name will be used as the target 
 #### Listeners
 
 ```javascript
-FrameCourier.addActionListener(
-  'my action',
+FrameCourier.listen(
+  'my event',
   function(payload) { alert(payload); }
 );
 ```
@@ -27,9 +27,9 @@ FrameCourier.addActionListener(
 #### Sending Messages
 
 ```javascript
-FrameCourier.sendMessage(
+FrameCourier.send(
   'myframe',     // target frame name
-  'my action',   // action (listener)
+  'my event',    // event (listener)
   'my message'   // payload
 );
 ```
@@ -41,17 +41,22 @@ FrameCourier.sendMessage(
 Use built in response callbacks to send messages back to the originating frame.
 
 ```javascript
-FrameCourier.addActionListener(
-  'my action',
+FrameCourier.listen(
+  'my event',
   function(payload, respond) { alert(payload); respond('response payload'); }
 );
 ```
 
 ```javascript
-FrameCourier.sendMessage(
+FrameCourier.send(
   'myframe',     // target frame name
-  'my action',   // action (listener)
+  'my event',   // action (listener)
   'my message',  // payload
   function(responsePayload) { alert('got response: ' + responsePayload); }
 );
 ```
+
+## Implementation
+
+ - Use `/dist/frame-courier.min.js` to have `FrameCourier` assigned as a global variable.
+ - Import `/src/index.js` into your script to assign to your own internal variable.

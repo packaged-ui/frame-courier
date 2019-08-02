@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="/build/frame-courier.min.js"></script>
+  <script src="/dist/frame-courier.min.js"></script>
   <script>
-    FrameCourier.addActionListener('myaction', function (pl, respond)
+    FrameCourier.listen('message', function (pl, respond)
     {
       alert('top frame received message ' + JSON.stringify(pl));
       respond('thanks from top frame');
