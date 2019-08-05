@@ -1,4 +1,5 @@
 import debounce from 'debounce';
+import hashSum from 'hash-sum';
 
 let _frameName = null;
 let _frames = {};
@@ -37,7 +38,7 @@ function addFrame(name, id, origin)
 function _getEnvelope(event, to, toOrigin, payload)
 {
   return {
-    messageId: event + ':' + _hashCode(Date.now() + to + payload),
+    messageId: event + ':' + hashSum(Date.now() + to + payload),
     event: event,
     to: to,
     toOrigin: toOrigin,
@@ -137,7 +138,7 @@ export function addListener(event, callback)
 
 function _getResponseEvent(messageId)
 {
-  return events.MESSAGE_RESPONSE + ':' + _hashCode(messageId);
+  return events.MESSAGE_RESPONSE + ':' + hashSum(messageId);
 }
 
 if(window === window.top)
@@ -248,7 +249,7 @@ if(window === window.top)
         }
       });
 
-    const frameHash = _hashCode(JSON.stringify(_frames));
+    const frameHash = hashSum(JSON.stringify(_frames));
 
     Object.keys(_frames)
           .filter((name) => _frames[name].origin) // don't send init to main frame
@@ -272,7 +273,7 @@ else
   let ready = false;
   addListener(events.PROBE, (pl, respond) =>
   {
-    const currentHash = _hashCode(JSON.stringify(_frames));
+    const currentHash = hashSum(JSON.stringify(_frames));
     const spl = pl.split(' ', 2);
 
     if(currentHash === spl[1])
@@ -295,20 +296,4 @@ else
       }
     );
   });
-}
-
-function _hashCode(str)
-{
-  let hash = 0, i, chr;
-  if(str.length === 0)
-  {
-    return hash;
-  }
-  for(i = 0; i < str.length; i++)
-  {
-    chr = str.charCodeAt(i);
-    hash = ((hash << 5) - hash) + chr;
-    hash |= 0; // Convert to 32bit integer
-  }
-  return String(hash);
 }

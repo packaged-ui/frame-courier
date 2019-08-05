@@ -23,6 +23,7 @@
     "build": "rollup -c rollup.config.js"
   },
   "dependencies": {
-    "debounce": "^1.2.0"
+    "debounce": "^1.2.0",
+    "hash-sum": "^2.0.0"
   }
 }
