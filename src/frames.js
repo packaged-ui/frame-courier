@@ -1,3 +1,5 @@
+import debounce from 'debounce';
+
 let _frameName = null;
 let _frames = {};
 if(window === window.top)
@@ -171,6 +173,8 @@ if(window === window.top)
     });
   }
 
+  const debouncedUpdateFrames = debounce(updateFrames, 10);
+
   function _iframesRemoved(iframes)
   {
     if(iframes.length)
@@ -187,7 +191,7 @@ if(window === window.top)
             }
           }
         });
-      updateFrames();
+      debouncedUpdateFrames();
     }
   }
 
@@ -211,7 +215,7 @@ if(window === window.top)
             }
           }
         });
-      updateFrames();
+      debouncedUpdateFrames();
     }
   );
 
