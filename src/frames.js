@@ -37,6 +37,13 @@ function addFrame(name, id, origin)
 
 function _getEnvelope(event, to, toOrigin, payload)
 {
+  /* `undefined` payloads are unset in the envelope,
+   * so are discarded as invalid in the delivery room.
+   *
+   * Set to null to ensure it always exists.
+   */
+  payload = payload || null;
+
   return {
     messageId: event + ':' + hashSum(Date.now() + to + payload),
     event: event,
