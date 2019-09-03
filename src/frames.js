@@ -1,12 +1,14 @@
 import debounce from 'debounce';
 import hashSum from 'hash-sum';
+import CustomEvent from 'custom-event';
+import 'window-location-origin';
 
 let _frameName = null;
 let _frames = {};
 if(window === window.top)
 {
   _frameName = '';
-  addFrame(_frameName, -1, window.origin, true);
+  addFrame(_frameName, -1, window.location.origin, true);
 }
 
 const events = {
@@ -50,7 +52,7 @@ function _getEnvelope(event, to, toOrigin, payload)
     to: to,
     toOrigin: toOrigin,
     from: _frameName,
-    fromOrigin: window.origin,
+    fromOrigin: window.location.origin,
     payload: payload,
   };
 }
@@ -109,7 +111,7 @@ window.addEventListener('message', (msg) =>
     if(['event', 'to', 'toOrigin', 'from', 'fromOrigin', 'payload'].every((value) => envelope.hasOwnProperty(value)))
     {
       // is this definitely for me?
-      if(((envelope.toOrigin === '*') || envelope.toOrigin === window.origin) && (_frameName === null || _frameName === envelope.to))
+      if(((envelope.toOrigin === '*') || envelope.toOrigin === window.location.origin) && (_frameName === null || _frameName === envelope.to))
       {
         if(listeners.hasOwnProperty(envelope.event))
         {

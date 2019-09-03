@@ -23,7 +23,9 @@
     "build": "rollup -c rollup.config.js"
   },
   "dependencies": {
+    "custom-event": "^1.0.1",
     "debounce": "^1.2.0",
-    "hash-sum": "^2.0.0"
+    "hash-sum": "^2.0.0",
+    "window-location-origin": "^0.1.0"
   }
 }
