@@ -97,7 +97,7 @@ function _sendWindowMessage(targetWindow, origin, envelope, callback)
 // listen to messages
 window.addEventListener('message', (msg) =>
 {
-  if(msg.isTrusted && msg.data)
+  if(msg.data)
   {
     let envelope;
     try
