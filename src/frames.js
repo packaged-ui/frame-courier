@@ -76,12 +76,12 @@ export function sendMessage(frameName, event, payload, callback)
     }
     else
     {
-      console.warn('target has been removed');
+      throw {message: 'target window is not accessible', data: frameName};
     }
   }
   else
   {
-    console.warn('frame does not exist', frameName);
+    throw {message: 'frame does not exist', data: frameName};
   }
 }
 
