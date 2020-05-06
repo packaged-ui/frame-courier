@@ -53,7 +53,7 @@ function _getEnvelope(event, to, toOrigin, payload)
     toOrigin: toOrigin,
     from: _frameName,
     fromOrigin: window.location.origin,
-    payload: payload,
+    payload: JSON.stringify(payload),
   };
 }
 
@@ -113,6 +113,7 @@ window.addEventListener('message', (msg) =>
       // is this definitely for me?
       if(((envelope.toOrigin === '*') || envelope.toOrigin === window.location.origin) && (_frameName === null || _frameName === envelope.to))
       {
+        const payload = JSON.parse(envelope.payload);
         if(listeners.hasOwnProperty(envelope.event))
         {
           const responseCallback = (responsePayload, cb) =>
@@ -128,7 +129,7 @@ window.addEventListener('message', (msg) =>
           listeners[envelope.event].forEach(
             (callback) =>
             {
-              callback(envelope.payload, responseCallback, msg.source, msg.origin);
+              callback(payload, responseCallback, msg.source, msg.origin);
             })
         }
       }
