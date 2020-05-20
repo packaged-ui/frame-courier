@@ -23,7 +23,7 @@ const listeners = {};
 /**
  * @param {Frame} frame
  */
-function addFrame(frame)
+function _addFrame(frame)
 {
   if(_frames[frame.id])
   {
@@ -38,7 +38,7 @@ function addFrame(frame)
  * @param {String} id
  * @returns {Frame}
  */
-function getFrame(id)
+function _getFrame(id)
 {
   return _frames[id];
 }
@@ -207,7 +207,7 @@ function _getResponseEvent(messageId)
 if(window === window.top)
 {
   _frameId = '';
-  addFrame(new Frame('', [], -1, window.location.origin));
+  _addFrame(new Frame('', [], -1, window.location.origin));
 
   // listen for iframe deletions
   if(window.MutationObserver)
@@ -241,7 +241,7 @@ if(window === window.top)
     });
   }
 
-  const debouncedUpdateFrames = debounce(updateFrames, 10);
+  const debouncedUpdateFrames = debounce(_updateFrames, 10);
 
   function _iframesRemoved(iframes)
   {
@@ -292,7 +292,7 @@ if(window === window.top)
     const frameTags = iframeElement.getAttribute('courier-tags');
     const frameNumber = _findFrameNumber(iframeElement);
 
-    const frame = getFrame(frameId);
+    const frame = _getFrame(frameId);
     if(frame)
     {
       frame.setFrameNumber(frameNumber);
@@ -303,7 +303,7 @@ if(window === window.top)
     }
     else
     {
-      addFrame(new Frame(frameId, frameTags, frameNumber, origin));
+      _addFrame(new Frame(frameId, frameTags, frameNumber, origin));
     }
   }
 
@@ -319,7 +319,7 @@ if(window === window.top)
     return false;
   }
 
-  function updateFrames()
+  function _updateFrames()
   {
     // refresh ids
     document.querySelectorAll('iframe').forEach(iframe => _refreshFrame(iframe));
