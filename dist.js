@@ -1,3 +1,3 @@
-import FrameCourier from './index';
+import {FrameCourier} from './src/frames';
 
-window.FrameCourier = FrameCourier;
+window.FrameCourier = FrameCourier

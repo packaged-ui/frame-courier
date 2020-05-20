@@ -3,6 +3,12 @@
 High level interface to window.postMessage.
 This package makes it easy to send and receive secure messages cross-origin.
 
+### Launching Demo
+
+1. Compile the distribution (`yarn install && yarn build`)
+2. Serve the demo. The simplest way (if you have php enabled) is to use the php built-in webserver `php -s localhost:8111 -t .`
+3. Open the browser http://localhost:8111/demo/
+
 ### Basic Usage
 
 #### Frames

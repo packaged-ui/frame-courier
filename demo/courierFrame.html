@@ -4,7 +4,8 @@
   <script>
     document.addEventListener('frame-courier-ready', function ()
     {
-      document.querySelector('#txt').innerText = 'this frame has courier ' + FrameCourier.name();
+      document.querySelector('#txtId').innerText = FrameCourier.id();
+      document.querySelector('#txtTags').innerText = FrameCourier.tags().join(' ');
     });
   </script>
   <script src="/dist/frame-courier.min.js"></script>
@@ -19,15 +20,19 @@
     FrameCourier.listen('message', function (pl, respond)
     {
       addMsg('received message ' + JSON.stringify(pl));
-      respond('thanks from ' + FrameCourier.name());
+      respond('thanks from ' + FrameCourier.id());
     });
   </script>
 </head>
 <body>
-<div id="txt">this frame has courier</div>
+<div>Courier ID: <span id="txtId"></span></div>
+<div>Tags: <span id="txtTags"></span></div>
+<hr/>
 <div>Target: <input id="target" type="text"/></div>
 <div>Message: <input id="msg" type="text"/></div>
-<button id="sendbtn">Send</button>
+<button id="sendbtn">Send to Frame</button>
+<button id="sendtagbtn">Send to Tag</button>
+<button id="broadcastbtn">Broadcast</button>
 <hr/>
 <div id="msgs"></div>
 <script>
@@ -35,6 +40,29 @@
   {
     FrameCourier.send(
       document.querySelector('#target').value,
+      'message',
+      document.querySelector('#msg').value,
+      function (pl)
+      {
+        addMsg('received response ' + JSON.stringify(pl));
+      }
+    )
+  });
+  document.querySelector('#sendtagbtn').addEventListener('click', function ()
+  {
+    FrameCourier.sendToTag(
+      document.querySelector('#target').value,
+      'message',
+      document.querySelector('#msg').value,
+      function (pl)
+      {
+        addMsg('received response ' + JSON.stringify(pl));
+      }
+    )
+  });
+  document.querySelector('#broadcastbtn').addEventListener('click', function ()
+  {
+    FrameCourier.broadcast(
       'message',
       document.querySelector('#msg').value,
       function (pl)
