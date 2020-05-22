@@ -86,7 +86,7 @@ function getTags()
  *
  * @param {String} frameId   ID of the frame to send the message to
  * @param {String} event
- * @param {any} payload      Will be serialized using JSON.stringify
+ * @param {any} [payload]      Will be serialized using JSON.stringify
  * @param {MessageReply}  [callback]
  * @param {string}  [targetOrigin]
  */
