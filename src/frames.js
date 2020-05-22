@@ -371,7 +371,7 @@ else
         {
           ready = true;
           document.dispatchEvent(new CustomEvent('frame-courier-ready', {detail: {frameId: _frameId}}));
-          sendMessage('', events.READY, _frameId)
+          broadcast(events.READY, _frameId)
         }
       }
     );
