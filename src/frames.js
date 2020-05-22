@@ -11,11 +11,13 @@ let _frameId = null;
  */
 let _frames = {};
 
+const _EVENT_PREFIX = '_frame_courier--';
+
 const events = {
-  LOADED: '_loaded', // iframe notifies top that it has loaded the script
-  PROBE: '_probe', // handshake with frame to see if it accepts messages
-  READY: '_ready', // iframe notifies top that it has been initialized and is ready to receive messages
-  MESSAGE_RESPONSE: '_message_response',
+  LOADED: _EVENT_PREFIX + 'loaded', // iframe notifies top that it has loaded the script
+  PROBE: _EVENT_PREFIX + 'probe', // handshake with frame to see if it accepts messages
+  READY: _EVENT_PREFIX + 'ready', // iframe all other frames that it has been initialized and is ready to receive messages
+  MESSAGE_RESPONSE: _EVENT_PREFIX + 'message-response',
 };
 
 const listeners = {};
@@ -388,4 +390,5 @@ export const FrameCourier = {
   id: getId,
   tags: getTags,
   listen: addListener,
+  events,
 }
