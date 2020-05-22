@@ -11,7 +11,8 @@ export class Frame
 
   constructor(id, tags, frameNumber, origin)
   {
-    if(tags && (typeof tags === 'string'))
+    tags = tags || [];
+    if(typeof tags === 'string')
     {
       tags = tags.split(/\s+/);
     }
