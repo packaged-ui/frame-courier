@@ -291,6 +291,11 @@ if(window === window.top)
   {
     if(!iframeElement.hasAttribute('courier-id'))
     {
+      if(!origin)
+      {
+        // this frame is has not loaded FrameCourier (yet?)
+        return;
+      }
       iframeElement.setAttribute('courier-id', 'frame-' + _randomString())
     }
     const frameId = iframeElement.getAttribute('courier-id');
@@ -394,4 +399,5 @@ export const FrameCourier = {
   tags: getTags,
   listen: addListener,
   events,
+  frames: _frames
 }
