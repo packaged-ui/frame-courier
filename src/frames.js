@@ -136,7 +136,10 @@ function broadcast(event, payload, callback, targetOrigin)
   Object.values(_frames).forEach(
     frame =>
     {
-      sendMessage(frame.id, event, payload, callback, targetOrigin);
+      if(frame.id !== _frameId)
+      {
+        sendMessage(frame.id, event, payload, callback, targetOrigin);
+      }
     });
 }
 
