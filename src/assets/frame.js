@@ -6,7 +6,9 @@ export class Frame
    */
   static fromObject(obj)
   {
-    return Object.setPrototypeOf(obj, this.prototype);
+    const frame = new this.prototype.constructor();
+    Object.assign(frame, obj);
+    return frame;
   }
 
   constructor(id, tags, frameNumber, origin)

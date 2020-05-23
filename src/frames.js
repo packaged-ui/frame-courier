@@ -372,8 +372,8 @@ else
       (initPayload) =>
       {
         _frameId = initPayload.frameId;
-        Object.values(initPayload.frames).map(frame => Frame.fromObject(frame));
-        _frames = initPayload.frames;
+        _frames = {};
+        Object.values(initPayload.frames).forEach(frame => _addFrame(Frame.fromObject(frame)));
 
         if(!ready)
         {
