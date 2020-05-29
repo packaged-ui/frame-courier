@@ -306,12 +306,8 @@ if(window === window.top)
     if(frame)
     {
       frame.setFrameNumber(frameNumber);
-      if(origin)
-      {
-        frame.setOrigin(origin);
-      }
     }
-    else
+    else if(origin)
     {
       _addFrame(new Frame(frameId, frameTags, frameNumber, origin));
     }

@@ -51,12 +51,6 @@ export class Frame
     return this;
   }
 
-  setOrigin(origin)
-  {
-    this._origin = origin;
-    return this;
-  }
-
   get origin()
   {
     return this._origin;
