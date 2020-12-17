@@ -1,17 +1,85 @@
+import {Envelope} from "./messages";
+
+let _frameId = null;
+let _frameTags = [];
+
+/**
+ * @type {Map<String,Frame>}
+ * @private
+ */
+const _frames = new Map();
+const _listeners = new Map();
+
+/**
+ * @param {String} id
+ */
+export function setId(id)
+{
+  if(_frameId !== null)
+  {
+    throw 'frame id already set';
+  }
+  _frameId = id;
+}
+
+export function getId()
+{
+  return _frameId;
+}
+
+/**
+ * @param {String[]} tags
+ */
+export function setTags(tags)
+{
+  _frameTags = tags || [];
+}
+
+export function getTags()
+{
+  return _frameTags || [];
+}
+
+/**
+ * @param {Frame} frame
+ */
+export function addFrame(frame)
+{
+  if(_frames.has(frame.id))
+  {
+    console.warn('cannot add two frames with the same id');
+    return;
+  }
+  _frames.set(frame.id, frame);
+  return frame;
+}
+
+/**
+ * @param {String} id
+ * @returns {Frame}
+ */
+export function getFrame(id)
+{
+  return _frames.get(id);
+}
+
+/**
+ * @returns {Frame[]}
+ */
+export function getAllFrames()
+{
+  return Array.from(_frames.values());
+}
+
 export class Frame
 {
   /**
-   * @param obj
-   * @returns {Frame}
+   * @param {String} id
+   * @param {String[]} tags
+   * @param {String} origin
+   * @param {MessagePort} port
    */
-  static fromObject(obj)
-  {
-    const frame = new this.prototype.constructor();
-    Object.assign(frame, obj);
-    return frame;
-  }
-
-  constructor(id, tags, frameNumber, origin)
+  constructor(id, tags, origin, port)
   {
     tags = tags || [];
     if(typeof tags === 'string')
@@ -26,8 +94,21 @@ export class Frame
 
     this._id = id;
     this._tags = typeof tags === 'string' ? tags.split(/\s+/) : tags;
-    this._frameNumber = frameNumber;
     this._origin = origin;
+    this._port = port;
+
+    this._port.addEventListener('message', (msg) =>
+    {
+      const envelope = Envelope.fromString(msg.data);
+      const listeners = _listeners.get(envelope.event);
+
+      const responseCallback = (responsePayload, cb) =>
+      {
+        this.send(envelope.responseEvent, responsePayload, cb);
+      };
+      listeners.forEach(callback => callback(envelope.payload, responseCallback, msg));
+    });
+    this._port.start();
   }
 
   get id()
@@ -40,19 +121,40 @@ export class Frame
     return this._tags;
   }
 
-  get frameNumber()
-  {
-    return this._frameNumber;
-  }
-
-  setFrameNumber(frameNumber)
-  {
-    this._frameNumber = frameNumber;
-    return this;
-  }
-
   get origin()
   {
     return this._origin;
+  }
+
+  /**
+   * @param {String} event
+   * @param {any} payload
+   * @param {Function?} callback
+   */
+  send(event, payload, callback)
+  {
+    const envelope = new Envelope(this.id, _frameId, event, payload);
+    if(callback)
+    {
+      this.listen(envelope.responseEvent, callback)
+    }
+    this._port.postMessage(envelope.toString());
+  }
+
+  listen(event, callback)
+  {
+    addListener(event, callback);
+  }
+}
+
+export function addListener(event, callback)
+{
+  if(!_listeners.has(event))
+  {
+    _listeners.set(event, [callback]);
+  }
+  else
+  {
+    _listeners.get(event).push(callback);
   }
 }

@@ -1,14 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="/dist/frame-courier.min.js"></script>
-  <script>
-    FrameCourier.listen('message', function (pl, respond)
-    {
-      alert('top frame received message ' + JSON.stringify(pl));
-      respond('thanks from top frame');
-    });
-  </script>
+  <script src="../dist/frame-courier.min.js"></script>
 </head>
 <body>
 
@@ -17,17 +10,23 @@
 <div id="frames"></div>
 
 <script>
+  FrameCourier.listen('message', function (pl, respond)
+  {
+    alert('top frame received message ' + JSON.stringify(pl));
+    respond('thanks from top frame');
+  });
+
   document.querySelector('#addnew').addEventListener('click', function ()
   {
-    let ifr = document.createElement('iframe');
+    var ifr = document.createElement('iframe');
     ifr.setAttribute('courier-tags', 'all frame-' + Math.abs(Math.floor(Math.random() * 3)));
-    ifr.setAttribute('src', '/demo/courierFrame.html');
+    ifr.setAttribute('src', '../demo/courierFrame.html');
     document.querySelector('#frames').appendChild(ifr);
   });
   document.querySelector('#addnormal').addEventListener('click', function ()
   {
-    let ifr = document.createElement('iframe');
-    ifr.setAttribute('src', '/demo/normalFrame.html');
+    var ifr = document.createElement('iframe');
+    ifr.setAttribute('src', '../demo/normalFrame.html');
     document.querySelector('#frames').insertBefore(ifr, document.querySelector('#frames').firstChild);
   });
 </script>

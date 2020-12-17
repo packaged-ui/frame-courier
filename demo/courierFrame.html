@@ -1,28 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script>
-    document.addEventListener('frame-courier-ready', function ()
-    {
-      document.querySelector('#txtId').innerText = FrameCourier.id();
-      document.querySelector('#txtTags').innerText = FrameCourier.tags().join(' ');
-    });
-  </script>
-  <script src="/dist/frame-courier.min.js"></script>
-  <script>
-    function addMsg(text)
-    {
-      var p = document.createElement('p');
-      p.innerText = text;
-      document.querySelector('#msgs').appendChild(p);
-    }
-
-    FrameCourier.listen('message', function (pl, respond)
-    {
-      addMsg('received message ' + JSON.stringify(pl));
-      respond('thanks from ' + FrameCourier.id());
-    });
-  </script>
+  <script src="../dist/frame-courier.min.js"></script>
 </head>
 <body>
 <div>Courier ID: <span id="txtId"></span></div>
@@ -36,40 +15,59 @@
 <hr/>
 <div id="msgs"></div>
 <script>
-  document.querySelector('#sendbtn').addEventListener('click', function ()
+  function addMsg(text)
   {
-    FrameCourier.send(
-      document.querySelector('#target').value,
-      'message',
-      document.querySelector('#msg').value,
-      function (pl)
-      {
-        addMsg('received response ' + JSON.stringify(pl));
-      }
-    )
-  });
-  document.querySelector('#sendtagbtn').addEventListener('click', function ()
+    var p = document.createElement('p');
+    p.innerText = text;
+    document.querySelector('#msgs').appendChild(p);
+  }
+
+  document.addEventListener('frame-courier-ready', function ()
   {
-    FrameCourier.sendToTag(
-      document.querySelector('#target').value,
-      'message',
-      document.querySelector('#msg').value,
-      function (pl)
-      {
-        addMsg('received response ' + JSON.stringify(pl));
-      }
-    )
-  });
-  document.querySelector('#broadcastbtn').addEventListener('click', function ()
-  {
-    FrameCourier.broadcast(
-      'message',
-      document.querySelector('#msg').value,
-      function (pl)
-      {
-        addMsg('received response ' + JSON.stringify(pl));
-      }
-    )
+    document.querySelector('#txtId').innerText = FrameCourier.id();
+    document.querySelector('#txtTags').innerText = FrameCourier.tags().join(' ');
+
+    FrameCourier.listen('message', function (pl, respond)
+    {
+      addMsg('received message ' + JSON.stringify(pl));
+      respond('thanks from ' + FrameCourier.id());
+    });
+
+    document.querySelector('#sendbtn').addEventListener('click', function ()
+    {
+      FrameCourier.send(
+        document.querySelector('#target').value,
+        'message',
+        document.querySelector('#msg').value,
+        function (pl)
+        {
+          addMsg('received response ' + JSON.stringify(pl));
+        }
+      )
+    });
+    document.querySelector('#sendtagbtn').addEventListener('click', function ()
+    {
+      FrameCourier.sendToTag(
+        document.querySelector('#target').value,
+        'message',
+        document.querySelector('#msg').value,
+        function (pl)
+        {
+          addMsg('received response ' + JSON.stringify(pl));
+        }
+      )
+    });
+    document.querySelector('#broadcastbtn').addEventListener('click', function ()
+    {
+      FrameCourier.broadcast(
+        'message',
+        document.querySelector('#msg').value,
+        function (pl)
+        {
+          addMsg('received response ' + JSON.stringify(pl));
+        }
+      )
+    });
   });
 </script>
 </body>
