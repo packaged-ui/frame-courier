@@ -9,7 +9,15 @@
   },
   "license": "MIT",
   "private": false,
+  "browserslist": [
+    "defaults",
+    "IE >= 8",
+    "> 0.02%",
+    "last 2 versions",
+    "Firefox ESR"
+  ],
   "dependencies": {
+    "browserslist": "^4.16.0",
     "custom-event": "^1.0.1",
     "debounce": "^1.2.0",
     "hash-sum": "^2.0.0"
@@ -17,10 +25,11 @@
   "devDependencies": {
     "@babel/core": "^7.11.1",
     "@babel/preset-env": "^7.11.0",
-    "core-js": "3",
     "@rollup/plugin-babel": "^5.2.2",
     "@rollup/plugin-commonjs": "^17.0.0",
     "@rollup/plugin-node-resolve": "^11.0.1",
+    "core-js": "3",
+    "rollup": "^2.35.1",
     "rollup-plugin-terser": "^7.0.2"
   },
   "scripts": {

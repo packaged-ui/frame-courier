@@ -106,7 +106,7 @@ export class Frame
       {
         this.send(envelope.responseEvent, responsePayload, cb);
       };
-      listeners.forEach(callback => callback(envelope.payload, responseCallback, msg));
+      listeners.forEach(callback => callback(envelope.payload, responseCallback, envelope, msg));
     });
     this._port.start();
   }
@@ -157,4 +157,9 @@ export function addListener(event, callback)
   {
     _listeners.get(event).push(callback);
   }
+}
+
+function _handleMessage()
+{
+
 }

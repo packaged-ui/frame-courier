@@ -4,7 +4,6 @@ import commonjs from '@rollup/plugin-commonjs';
 import babel from '@rollup/plugin-babel';
 
 process.chdir(__dirname);
-const ieBrowsers = ['ie > 9', '> 0.02%', 'last 2 versions', 'Firefox ESR'];
 
 const defaultCfg = {
   input: './dist.js',
@@ -30,7 +29,6 @@ const defaultCfg = {
               corejs: 3,
               modules: false,
               useBuiltIns: 'usage',
-              targets: ieBrowsers,
             },
           ],
         ],
