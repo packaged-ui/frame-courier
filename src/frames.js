@@ -73,10 +73,17 @@ if(window === window.top)
         const frame = getFrame(frameId);
         if(((!frame) && msg.origin) || frame.origin === msg.origin)
         {
-          const channel = new MessageChannel();
-          if(!_recoverFrame(frameId, msg.origin, channel.port1))
+          let sendPort = msg.source;
+          let recvPort = null;
+          if(window.MessageChannel)
           {
-            addFrame(new Frame(frameId, frameTags, msg.origin, channel.port1));
+            const channel = new MessageChannel();
+            sendPort = channel.port1;
+            recvPort = channel.port2;
+          }
+          if(!_recoverFrame(frameId, msg.origin, sendPort))
+          {
+            addFrame(new Frame(frameId, frameTags, msg.origin, sendPort));
           }
           const readyEnvelope = new Envelope(
             frameId,
@@ -84,7 +91,7 @@ if(window === window.top)
             events.SETUP,
             new NegotiationPayload(frameId, frameTags)
           );
-          msg.source.postMessage(readyEnvelope.toString(), msg.origin, [channel.port2]);
+          msg.source.postMessage(readyEnvelope.toString(), msg.origin, [recvPort]);
         }
       }
     }
@@ -107,7 +114,7 @@ else
         {
           setId(payload.frameId);
           setTags(payload.frameTags);
-          addFrame(new Frame('', [], msg.origin, msg.ports[0]));
+          addFrame(new Frame('', [], msg.origin, msg.ports ? msg.ports[0] : msg.source));
         }
 
         // we are now set up, send READY to all other top frames with our setup payload
@@ -128,10 +135,17 @@ else
         const payload = NegotiationPayload.fromObject(envelope.payload);
         if(payload.frameId && payload.frameTags && envelope.from === payload.frameId && envelope.to === '?')
         {
-          const channel = new MessageChannel();
-          if(!_recoverFrame(payload.frameId, msg.origin, channel.port1))
+          let sendPort = msg.source;
+          let recvPort = null;
+          if(window.MessageChannel)
           {
-            addFrame(new Frame(payload.frameId, payload.frameTags, msg.origin, channel.port1));
+            const channel = new MessageChannel();
+            sendPort = channel.port1;
+            recvPort = channel.port2;
+          }
+          if(!_recoverFrame(payload.frameId, msg.origin, sendPort))
+          {
+            addFrame(new Frame(payload.frameId, payload.frameTags, msg.origin, sendPort));
           }
           const handshakeEnvelope = new Envelope(
             payload.frameId,
@@ -139,7 +153,7 @@ else
             events.HANDSHAKE,
             new NegotiationPayload(getId(), getTags())
           )
-          msg.source.postMessage(handshakeEnvelope.toString(), msg.origin, [channel.port2]);
+          msg.source.postMessage(handshakeEnvelope.toString(), msg.origin, [recvPort]);
         }
       }
       if(envelope.event === events.HANDSHAKE)
@@ -148,9 +162,9 @@ else
         const payload = NegotiationPayload.fromObject(envelope.payload);
         if(payload.frameId && payload.frameTags && envelope.from === payload.frameId)
         {
-          if(!_recoverFrame(payload.frameId, msg.origin, msg.ports[0]))
+          if(!_recoverFrame(payload.frameId, msg.origin, msg.ports ? msg.ports[0] : msg.source))
           {
-            addFrame(new Frame(payload.frameId, payload.frameTags, msg.origin, msg.ports[0]));
+            addFrame(new Frame(payload.frameId, payload.frameTags, msg.origin, msg.ports ? msg.ports[0] : msg.source));
           }
         }
       }

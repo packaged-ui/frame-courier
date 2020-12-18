@@ -96,6 +96,22 @@ export class Frame
     this._id = id;
     this._tags = typeof tags === 'string' ? tags.split(/\s+/) : tags;
     this._origin = origin;
+    this._msgListener = (msg) =>
+    {
+      const envelope = Envelope.fromString(msg.data);
+      if(envelope.to === getId() && envelope.from === this.id)
+      {
+        const listeners = _listeners.get(envelope.event);
+        if(listeners)
+        {
+          const responseCallback = (responsePayload, cb) =>
+          {
+            this.send(envelope.responseEvent, responsePayload, cb);
+          };
+          listeners.forEach(callback => callback(envelope.payload, responseCallback, envelope, msg));
+        }
+      }
+    };
     this.setPort(port);
   }
 
@@ -116,24 +132,32 @@ export class Frame
 
   setPort(port)
   {
-    if(this._port)
+    if(this._port && this._port.close)
     {
       this._port.close();
     }
-
     this._port = port;
-    this._port.addEventListener('message', (msg) =>
-    {
-      const envelope = Envelope.fromString(msg.data);
-      const listeners = _listeners.get(envelope.event);
 
-      const responseCallback = (responsePayload, cb) =>
+    if(this._port)
+    {
+      if(this._port === this._port.window)
       {
-        this.send(envelope.responseEvent, responsePayload, cb);
-      };
-      listeners.forEach(callback => callback(envelope.payload, responseCallback, envelope, msg));
-    });
-    this._port.start();
+        // only bind listener once, to window
+        window.removeEventListener('message', this._msgListener);
+        window.addEventListener('message', this._msgListener);
+      }
+      else
+      {
+        // bind listener to message port
+        this._port.removeEventListener('message', this._msgListener);
+        this._port.addEventListener('message', this._msgListener);
+      }
+    }
+
+    if(this._port.start)
+    {
+      this._port.start();
+    }
   }
 
   /**
@@ -148,7 +172,7 @@ export class Frame
     {
       this.listen(envelope.responseEvent, callback)
     }
-    this._port.postMessage(envelope.toString());
+    this._port.postMessage(envelope.toString(), this._port === this._port.window ? this.origin : null);
   }
 
   listen(event, callback)

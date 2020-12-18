@@ -11,18 +11,18 @@
   "private": false,
   "browserslist": [
     "defaults",
-    "IE >= 8",
+    "IE >= 9",
     "> 0.02%",
     "last 2 versions",
     "Firefox ESR"
   ],
   "dependencies": {
     "browserslist": "^4.16.0",
+    "console-polyfill": "^0.3.0",
     "custom-event": "^1.0.1",
     "custom-event-polyfill": "^1.0.7",
     "debounce": "^1.2.0",
-    "hash-sum": "^2.0.0",
-    "message-port-polyfill": "^0.2.0"
+    "hash-sum": "^2.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.11.1",
