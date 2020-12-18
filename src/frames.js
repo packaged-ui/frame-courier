@@ -93,58 +93,6 @@ if(window === window.top)
     }
   });
 
-  // listen for iframe deletions
-  if(window.MutationObserver)
-  {
-    (new MutationObserver(
-        (mutations) =>
-        {
-          // check for removed target
-          mutations.forEach(
-            (mutation) =>
-            {
-              Array.from(mutation.removedNodes)
-                   .filter((node) => node.nodeType === Node.ELEMENT_NODE)
-                   .forEach(
-                     (node) =>
-                     {
-                       _iframesRemoved((node.matches('iframe')) ? [node] : node.querySelectorAll('iframe'));
-                     });
-            });
-        })
-    ).observe(document, {subtree: true, childList: true});
-  }
-  else
-  {
-    document.addEventListener('DOMNodeRemoved', function (e)
-    {
-      if(e.target.nodeType === Node.ELEMENT_NODE)
-      {
-        _iframesRemoved((e.target.matches('iframe')) ? [e.target] : e.target.querySelectorAll('iframe'));
-      }
-    });
-  }
-
-  function _iframesRemoved(iframes)
-  {
-    if(iframes.length)
-    {
-      iframes.forEach(
-        (iframe) =>
-        {
-          if(iframe.hasAttribute('courier-id'))
-          {
-            const frameId = iframe.getAttribute('courier-id');
-            if(frameId && _frames[frameId])
-            {
-              delete _frames[frameId];
-            }
-          }
-        });
-      debouncedUpdateFrames();
-    }
-  }
-
   document.dispatchEvent(new CustomEvent('frame-courier-ready', {detail: {frameId: getId()}}));
 }
 else
