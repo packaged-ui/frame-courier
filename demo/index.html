@@ -12,7 +12,7 @@
 <script>
   FrameCourier.listen('message', function (pl, respond)
   {
-    console.log(`top frame received message ${JSON.stringify(pl)}`);
+    console.log('top frame received message ' + JSON.stringify(pl));
     respond(pl.split('').reverse().join(''));
   });
 

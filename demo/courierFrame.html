@@ -29,47 +29,47 @@
 
     FrameCourier.listen('message', function (pl, respond, env)
     {
-      addMsg(`&larr; FROM:${env.from} MSG:${pl}`);
+      addMsg('&larr; FROM:' + env.from + ' MSG:' + pl);
       var response = pl.split('').reverse().join('');
-      addMsg(`&rarr; TO:${env.from} MSG:${response}`);
+      addMsg('&rarr; TO:' + env.from + ' MSG:' + response);
       respond(response);
     });
 
     document.getElementById('sendbtn').addEventListener('click', function ()
     {
-      addMsg(`&rarr; TO:${document.getElementById('target').value} MSG:${document.getElementById('msg').value}`);
+      addMsg('&rarr; TO:' + document.getElementById('target').value + ' MSG:' + document.getElementById('msg').value);
       FrameCourier.send(
         document.getElementById('target').value,
         'message',
         document.getElementById('msg').value,
         function (pl, _, env)
         {
-          addMsg(`&larr; FROM:${env.from} MSG:${pl}`);
+          addMsg('&larr; FROM:' + env.from + ' MSG:' + pl);
         }
       )
     });
     document.getElementById('sendtagbtn').addEventListener('click', function ()
     {
-      addMsg(`&rarr; TAG:${document.getElementById('target').value} MSG:${document.getElementById('msg').value}`);
+      addMsg('&rarr; TAG:' + document.getElementById('target').value + ' MSG:' + document.getElementById('msg').value);
       FrameCourier.sendToTag(
         document.getElementById('target').value,
         'message',
         document.getElementById('msg').value,
         function (pl, _, env)
         {
-          addMsg(`&larr; FROM:${env.from} MSG:${pl}`);
+          addMsg('&larr; FROM:' + env.from + ' MSG:' + pl);
         }
       )
     });
     document.getElementById('broadcastbtn').addEventListener('click', function ()
     {
-      addMsg(`&rarr; BROADCAST: ${document.getElementById('msg').value}`);
+      addMsg('&rarr; BROADCAST: ' + document.getElementById('msg').value);
       FrameCourier.broadcast(
         'message',
         document.getElementById('msg').value,
         function (pl, _, env)
         {
-          addMsg(`&larr; FROM:${env.from} MSG:${pl}`);
+          addMsg('&larr; FROM:' + env.from + ' MSG:' + pl);
         }
       )
     });
