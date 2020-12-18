@@ -21,7 +21,8 @@
     "custom-event": "^1.0.1",
     "custom-event-polyfill": "^1.0.7",
     "debounce": "^1.2.0",
-    "hash-sum": "^2.0.0"
+    "hash-sum": "^2.0.0",
+    "message-port-polyfill": "^0.2.0"
   },
   "devDependencies": {
     "@babel/core": "^7.11.1",
