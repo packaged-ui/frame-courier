@@ -54,12 +54,12 @@ if(window === window.top)
   // top listens to LOADED
   window.addEventListener('message', (msg) =>
   {
-    if(msg.data)
+    if(msg.data && _isWindow(msg.source))
     {
       try
       {
         const envelope = Envelope.fromString(msg.data);
-        if(envelope.event === events.LOADED && _isWindow(msg.source) && envelope.from === '?')
+        if(envelope.event === events.LOADED && envelope.from === '?')
         {
           const iframe = Array.from(document.querySelectorAll('iframe'))
                               .find((iframe) => iframe.contentWindow === msg.source);
@@ -88,7 +88,7 @@ if(window === window.top)
       }
       catch(e)
       {
-        console.log(e);
+        console.warn(e);
       }
     }
   });
