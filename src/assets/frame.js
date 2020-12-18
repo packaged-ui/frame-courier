@@ -96,19 +96,7 @@ export class Frame
     this._id = id;
     this._tags = typeof tags === 'string' ? tags.split(/\s+/) : tags;
     this._origin = origin;
-    this._port = port;
-    this._port.addEventListener('message', (msg) =>
-    {
-      const envelope = Envelope.fromString(msg.data);
-      const listeners = _listeners.get(envelope.event);
-
-      const responseCallback = (responsePayload, cb) =>
-      {
-        this.send(envelope.responseEvent, responsePayload, cb);
-      };
-      listeners.forEach(callback => callback(envelope.payload, responseCallback, envelope, msg));
-    });
-    this._port.start();
+    this.setPort(port);
   }
 
   get id()
@@ -124,6 +112,28 @@ export class Frame
   get origin()
   {
     return this._origin;
+  }
+
+  setPort(port)
+  {
+    if(this._port)
+    {
+      this._port.close();
+    }
+
+    this._port = port;
+    this._port.addEventListener('message', (msg) =>
+    {
+      const envelope = Envelope.fromString(msg.data);
+      const listeners = _listeners.get(envelope.event);
+
+      const responseCallback = (responsePayload, cb) =>
+      {
+        this.send(envelope.responseEvent, responsePayload, cb);
+      };
+      listeners.forEach(callback => callback(envelope.payload, responseCallback, envelope, msg));
+    });
+    this._port.start();
   }
 
   /**

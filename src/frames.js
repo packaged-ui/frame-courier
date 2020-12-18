@@ -72,10 +72,13 @@ if(window === window.top)
           const frameTags = iframe.getAttribute('courier-tags').split(/\s+/);
 
           const frame = getFrame(frameId);
-          if((!frame) && msg.origin)
+          if(((!frame) && msg.origin) || frame.origin === msg.origin)
           {
             const channel = new MessageChannel();
-            addFrame(new Frame(frameId, frameTags, msg.origin, channel.port1));
+            if(!_recoverFrame(frameId, msg.origin, channel.port1))
+            {
+              addFrame(new Frame(frameId, frameTags, msg.origin, channel.port1));
+            }
             const readyEnvelope = new Envelope(
               frameId,
               '',
@@ -134,7 +137,10 @@ else
           if(payload.frameId && payload.frameTags && envelope.from === payload.frameId)
           {
             const channel = new MessageChannel();
-            addFrame(new Frame(payload.frameId, payload.frameTags, msg.origin, channel.port1));
+            if(!_recoverFrame(payload.frameId, msg.origin, channel.port1))
+            {
+              addFrame(new Frame(payload.frameId, payload.frameTags, msg.origin, channel.port1));
+            }
             const handshakeEnvelope = new Envelope(
               payload.frameId,
               getId(),
@@ -150,7 +156,10 @@ else
           const payload = NegotiationPayload.fromObject(envelope.payload);
           if(payload.frameId && payload.frameTags && envelope.from === payload.frameId)
           {
-            addFrame(new Frame(payload.frameId, payload.frameTags, msg.origin, msg.ports[0]));
+            if(!_recoverFrame(payload.frameId, msg.origin, msg.ports[0]))
+            {
+              addFrame(new Frame(payload.frameId, payload.frameTags, msg.origin, msg.ports[0]));
+            }
           }
         }
       }
@@ -161,6 +170,17 @@ else
   });
   const envelope = new Envelope('', '?', events.LOADED, null);
   window.top.postMessage(envelope.toString(), '*');
+}
+
+function _recoverFrame(id, origin, port)
+{
+  const existing = getFrame(id);
+  if(existing && existing.origin === origin)
+  {
+    existing.setPort(port);
+    return true;
+  }
+  return false;
 }
 
 function _randomString()
