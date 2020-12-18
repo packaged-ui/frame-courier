@@ -15,7 +15,7 @@ const defaultCfg = {
   plugins: [
     resolve({browser: true, preferBuiltins: false}),
     commonjs(),
-    terser({ie8: true}),
+    terser(),
 
     babel(
       {
