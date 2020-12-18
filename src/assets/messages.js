@@ -72,4 +72,9 @@ export class Envelope
   {
     return Object.assign(new this(), JSON.parse(str));
   }
+
+  toString()
+  {
+    return JSON.stringify(this);
+  }
 }
