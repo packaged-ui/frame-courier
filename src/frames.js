@@ -57,42 +57,35 @@ if(window === window.top)
   {
     if(msg.data && _isWindow(msg.source))
     {
-      try
+      const envelope = Envelope.fromString(msg.data);
+      if(envelope.event === events.LOADED && envelope.from === '?')
       {
-        const envelope = Envelope.fromString(msg.data);
-        if(envelope.event === events.LOADED && envelope.from === '?')
+        const iframe = Array.from(document.querySelectorAll('iframe'))
+                            .find((iframe) => iframe.contentWindow === msg.source);
+
+        if(!iframe.hasAttribute('courier-id'))
         {
-          const iframe = Array.from(document.querySelectorAll('iframe'))
-                              .find((iframe) => iframe.contentWindow === msg.source);
-
-          if(!iframe.hasAttribute('courier-id'))
-          {
-            iframe.setAttribute('courier-id', 'frame-' + _randomString());
-          }
-          const frameId = iframe.getAttribute('courier-id');
-          const frameTags = iframe.getAttribute('courier-tags').split(/\s+/);
-
-          const frame = getFrame(frameId);
-          if(((!frame) && msg.origin) || frame.origin === msg.origin)
-          {
-            const channel = new MessageChannel();
-            if(!_recoverFrame(frameId, msg.origin, channel.port1))
-            {
-              addFrame(new Frame(frameId, frameTags, msg.origin, channel.port1));
-            }
-            const readyEnvelope = new Envelope(
-              frameId,
-              '',
-              events.SETUP,
-              new NegotiationPayload(frameId, frameTags)
-            );
-            msg.source.postMessage(readyEnvelope.toString(), msg.origin, [channel.port2]);
-          }
+          iframe.setAttribute('courier-id', 'frame-' + _randomString());
         }
-      }
-      catch(e)
-      {
-        console.warn(e);
+        const frameId = iframe.getAttribute('courier-id');
+        const frameTags = iframe.getAttribute('courier-tags').split(/\s+/);
+
+        const frame = getFrame(frameId);
+        if(((!frame) && msg.origin) || frame.origin === msg.origin)
+        {
+          const channel = new MessageChannel();
+          if(!_recoverFrame(frameId, msg.origin, channel.port1))
+          {
+            addFrame(new Frame(frameId, frameTags, msg.origin, channel.port1));
+          }
+          const readyEnvelope = new Envelope(
+            frameId,
+            '',
+            events.SETUP,
+            new NegotiationPayload(frameId, frameTags)
+          );
+          msg.source.postMessage(readyEnvelope.toString(), msg.origin, [channel.port2]);
+        }
       }
     }
   });
@@ -106,69 +99,65 @@ else
   {
     if(msg.data && _isWindow(msg.source))
     {
-      try
+      const envelope = Envelope.fromString(msg.data);
+      if(envelope.event === events.SETUP && msg.source === window.top)
       {
-        const envelope = Envelope.fromString(msg.data);
-        if(envelope.event === events.SETUP && msg.source === window.top)
+        const payload = NegotiationPayload.fromObject(envelope.payload);
+        if(payload.frameId && payload.frameTags && envelope.from === '')
         {
-          const payload = NegotiationPayload.fromObject(envelope.payload);
-          if(payload.frameId && payload.frameTags && envelope.from === '')
-          {
-            setId(payload.frameId);
-            setTags(payload.frameTags);
-            addFrame(new Frame('', [], msg.origin, msg.ports[0]));
-          }
-
-          // we are now set up, send READY to all other top frames with our setup payload
-          for(let i = 0; i < window.top.frames.length; i++)
-          {
-            if(window.top.frames[i] !== window)
-            {
-              const readyEnvelope = new Envelope('?', getId(), events.READY, payload);
-              window.top.frames[i].postMessage(readyEnvelope.toString(), '*');
-            }
-          }
-
-          document.dispatchEvent(new CustomEvent('frame-courier-ready', {detail: {frameId: getId()}}));
+          setId(payload.frameId);
+          setTags(payload.frameTags);
+          addFrame(new Frame('', [], msg.origin, msg.ports[0]));
         }
-        if(envelope.event === events.READY)
+
+        // we are now set up, send READY to all other top frames with our setup payload
+        for(let i = 0; i < window.top.frames.length; i++)
         {
-          // got ready, create port, frame and handshake
-          const payload = NegotiationPayload.fromObject(envelope.payload);
-          if(payload.frameId && payload.frameTags && envelope.from === payload.frameId)
+          if(window.top.frames[i] !== window)
           {
-            const channel = new MessageChannel();
-            if(!_recoverFrame(payload.frameId, msg.origin, channel.port1))
-            {
-              addFrame(new Frame(payload.frameId, payload.frameTags, msg.origin, channel.port1));
-            }
-            const handshakeEnvelope = new Envelope(
-              payload.frameId,
-              getId(),
-              events.HANDSHAKE,
-              new NegotiationPayload(getId(), getTags())
-            )
-            msg.source.postMessage(handshakeEnvelope.toString(), msg.origin, [channel.port2]);
+            const readyEnvelope = new Envelope('?', getId(), events.READY, payload);
+            window.top.frames[i].postMessage(readyEnvelope.toString(), '*');
           }
         }
-        if(envelope.event === events.HANDSHAKE)
+
+        document.dispatchEvent(new CustomEvent('frame-courier-ready', {detail: {frameId: getId()}}));
+      }
+      if(envelope.event === events.READY)
+      {
+        // got ready, create port, frame and handshake
+        const payload = NegotiationPayload.fromObject(envelope.payload);
+        if(payload.frameId && payload.frameTags && envelope.from === payload.frameId && envelope.to === '?')
         {
-          // got ready, create port, frame and handshake
-          const payload = NegotiationPayload.fromObject(envelope.payload);
-          if(payload.frameId && payload.frameTags && envelope.from === payload.frameId)
+          const channel = new MessageChannel();
+          if(!_recoverFrame(payload.frameId, msg.origin, channel.port1))
           {
-            if(!_recoverFrame(payload.frameId, msg.origin, msg.ports[0]))
-            {
-              addFrame(new Frame(payload.frameId, payload.frameTags, msg.origin, msg.ports[0]));
-            }
+            addFrame(new Frame(payload.frameId, payload.frameTags, msg.origin, channel.port1));
           }
+          const handshakeEnvelope = new Envelope(
+            payload.frameId,
+            getId(),
+            events.HANDSHAKE,
+            new NegotiationPayload(getId(), getTags())
+          )
+          msg.source.postMessage(handshakeEnvelope.toString(), msg.origin, [channel.port2]);
         }
       }
-      catch(e)
+      if(envelope.event === events.HANDSHAKE)
       {
+        // got ready, create port, frame and handshake
+        const payload = NegotiationPayload.fromObject(envelope.payload);
+        if(payload.frameId && payload.frameTags && envelope.from === payload.frameId)
+        {
+          if(!_recoverFrame(payload.frameId, msg.origin, msg.ports[0]))
+          {
+            addFrame(new Frame(payload.frameId, payload.frameTags, msg.origin, msg.ports[0]));
+          }
+        }
       }
     }
   });
+
+  // send loaded message to top
   const envelope = new Envelope('', '?', events.LOADED, null);
   window.top.postMessage(envelope.toString(), '*');
 }
