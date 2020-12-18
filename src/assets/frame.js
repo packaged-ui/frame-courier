@@ -50,6 +50,7 @@ export function addFrame(frame)
     console.warn('cannot add two frames with the same id');
     return;
   }
+  console.debug('established channel with', frame.id);
   _frames.set(frame.id, frame);
   return frame;
 }
@@ -96,7 +97,6 @@ export class Frame
     this._tags = typeof tags === 'string' ? tags.split(/\s+/) : tags;
     this._origin = origin;
     this._port = port;
-
     this._port.addEventListener('message', (msg) =>
     {
       const envelope = Envelope.fromString(msg.data);
@@ -157,9 +157,4 @@ export function addListener(event, callback)
   {
     _listeners.get(event).push(callback);
   }
-}
-
-function _handleMessage()
-{
-
 }

@@ -27,10 +27,12 @@
     document.getElementById('txtId').innerText = FrameCourier.id();
     document.getElementById('txtTags').innerText = FrameCourier.tags().join(' ');
 
-    FrameCourier.listen('message', function (pl, respond)
+    FrameCourier.listen('message', function (pl, respond, env)
     {
-      addMsg(`&larr; ${pl}`);
-      respond('thanks from ' + FrameCourier.id());
+      addMsg(`&larr; FROM:${env.from} MSG:${pl}`);
+      var response = pl.split('').reverse().join('');
+      addMsg(`&rarr; TO:${env.from} MSG:${response}`);
+      respond(response);
     });
 
     document.getElementById('sendbtn').addEventListener('click', function ()

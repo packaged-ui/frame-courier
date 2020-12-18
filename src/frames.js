@@ -1,6 +1,6 @@
 import CustomEvent from 'custom-event';
 import {addFrame, getFrame, Frame, getId, getTags, getAllFrames, setId, setTags, addListener} from './assets/frame';
-import {Envelope, events, SetupPayload} from "./assets/messages";
+import {Envelope, events, NegotiationPayload} from "./assets/messages";
 
 /**
  * Send a message to a specific frame
@@ -80,7 +80,7 @@ if(window === window.top)
               frameId,
               '',
               events.SETUP,
-              SetupPayload.fromObject({frameId, frameTags})
+              new NegotiationPayload(frameId, frameTags)
             );
             msg.source.postMessage(readyEnvelope.toString(), msg.origin, [channel.port2]);
           }
@@ -152,14 +152,14 @@ else
   // frame listens to setup
   window.addEventListener('message', (msg) =>
   {
-    if(msg.data)
+    if(msg.data && _isWindow(msg.source))
     {
       try
       {
         const envelope = Envelope.fromString(msg.data);
-        if(envelope.event === events.SETUP && _isWindow(msg.source) && msg.source === window.top)
+        if(envelope.event === events.SETUP && msg.source === window.top)
         {
-          const payload = SetupPayload.fromObject(envelope.payload);
+          const payload = NegotiationPayload.fromObject(envelope.payload);
           if(payload.frameId && payload.frameTags && envelope.from === '')
           {
             setId(payload.frameId);
@@ -167,9 +167,43 @@ else
             addFrame(new Frame('', [], msg.origin, msg.ports[0]));
           }
 
-          // we are now set up, send READY to all top frames with our setup payload
+          // we are now set up, send READY to all other top frames with our setup payload
+          for(let i = 0; i < window.top.frames.length; i++)
+          {
+            if(window.top.frames[i] !== window)
+            {
+              const readyEnvelope = new Envelope('?', getId(), events.READY, payload);
+              window.top.frames[i].postMessage(readyEnvelope.toString(), '*');
+            }
+          }
 
           document.dispatchEvent(new CustomEvent('frame-courier-ready', {detail: {frameId: getId()}}));
+        }
+        if(envelope.event === events.READY)
+        {
+          // got ready, create port, frame and handshake
+          const payload = NegotiationPayload.fromObject(envelope.payload);
+          if(payload.frameId && payload.frameTags && envelope.from === payload.frameId)
+          {
+            const channel = new MessageChannel();
+            addFrame(new Frame(payload.frameId, payload.frameTags, msg.origin, channel.port1));
+            const handshakeEnvelope = new Envelope(
+              payload.frameId,
+              getId(),
+              events.HANDSHAKE,
+              new NegotiationPayload(getId(), getTags())
+            )
+            msg.source.postMessage(handshakeEnvelope.toString(), msg.origin, [channel.port2]);
+          }
+        }
+        if(envelope.event === events.HANDSHAKE)
+        {
+          // got ready, create port, frame and handshake
+          const payload = NegotiationPayload.fromObject(envelope.payload);
+          if(payload.frameId && payload.frameTags && envelope.from === payload.frameId)
+          {
+            addFrame(new Frame(payload.frameId, payload.frameTags, msg.origin, msg.ports[0]));
+          }
         }
       }
       catch(e)

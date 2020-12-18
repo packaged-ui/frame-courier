@@ -3,18 +3,18 @@ import hashSum from "hash-sum";
 const _EVENT_PREFIX = '_frame_courier--';
 export const events = {
   LOADED: _EVENT_PREFIX + 'loaded', // iframe notifies top that it has loaded the script
-  SETUP: _EVENT_PREFIX + 'setup', // iframe receives id
-  PROBE: _EVENT_PREFIX + 'probe', // handshake with frame to see if it accepts messages
-  READY: _EVENT_PREFIX + 'ready', // iframe all other frames that it has been initialized and is ready to receive messages
+  SETUP: _EVENT_PREFIX + 'setup', // iframe receives id and tags from top
+  READY: _EVENT_PREFIX + 'ready', // notify another frame that is exists and is ready to receive handshake
+  HANDSHAKE: _EVENT_PREFIX + 'handshake', // handshake contains a port for bidi communication
   MESSAGE_RESPONSE: _EVENT_PREFIX + 'message-response',
 };
 
-export class SetupPayload
+export class NegotiationPayload
 {
-  constructor()
+  constructor(frameId = null, frameTags = [])
   {
-    this.frameId = null;
-    this.frameTags = [];
+    this.frameId = frameId || null;
+    this.frameTags = frameTags || [];
   }
 
   static fromObject(obj)
