@@ -1,6 +1,7 @@
 import CustomEvent from 'custom-event';
 import {addFrame, getFrame, Frame, getId, getTags, getAllFrames, setId, setTags, addListener} from './assets/frame';
 import {Envelope, events, NegotiationPayload} from "./assets/messages";
+import 'custom-event-polyfill';
 
 /**
  * Send a message to a specific frame
