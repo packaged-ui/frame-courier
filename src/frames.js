@@ -233,6 +233,5 @@ export const FrameCourier = {
   tags: getTags,
   listen: addListener,
   events: events,
-  //frames: _frames
-  getFrame: getFrame,
+  frames: getAllFrames,
 };
