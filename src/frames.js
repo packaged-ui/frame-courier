@@ -1,5 +1,5 @@
 import CustomEvent from 'custom-event';
-import {addFrame, getFrame, Frame, getId, getTags, getAllFrames, setId, setTags, addListener} from './assets/frame';
+import {addFrame, addListener, Frame, getAllFrames, getFrame, getId, getTags, setId, setTags} from './assets/frame';
 import {Envelope, events, NegotiationPayload} from "./assets/messages";
 import 'console-polyfill';
 import ready from 'document-ready-promise';
@@ -56,7 +56,7 @@ if(_isTop())
   // top listens to LOADED
   window.addEventListener('message', (msg) =>
   {
-    if(!msg.data || !_isWindow(msg.source))
+    if(!msg.data || !msg.source || !_isWindow(msg.source))
     {
       return;
     }
@@ -110,7 +110,7 @@ else
   // frame listens to setup
   window.addEventListener('message', (msg) =>
   {
-    if(!msg.data || !_isWindow(msg.source))
+    if(!msg.data || !msg.source || !_isWindow(msg.source))
     {
       return;
     }
