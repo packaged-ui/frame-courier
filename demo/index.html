@@ -1,14 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="/dist/frame-courier.min.js"></script>
-  <script>
-    FrameCourier.listen('message', function (pl, respond)
-    {
-      alert('top frame received message ' + JSON.stringify(pl));
-      respond('thanks from top frame');
-    });
-  </script>
+  <script src="../dist/frame-courier.min.js"></script>
 </head>
 <body>
 
@@ -17,18 +10,24 @@
 <div id="frames"></div>
 
 <script>
-  document.querySelector('#addnew').addEventListener('click', function ()
+  FrameCourier.listen('message', function (pl, respond)
   {
-    let ifr = document.createElement('iframe');
-    ifr.setAttribute('courier-tags', 'all frame-' + Math.abs(Math.floor(Math.random() * 3)));
-    ifr.setAttribute('src', '/demo/courierFrame.html');
-    document.querySelector('#frames').appendChild(ifr);
+    console.log('top frame received message ' + JSON.stringify(pl));
+    respond(pl.split('').reverse().join(''));
   });
-  document.querySelector('#addnormal').addEventListener('click', function ()
+
+  document.getElementById('addnew').addEventListener('click', function ()
   {
-    let ifr = document.createElement('iframe');
-    ifr.setAttribute('src', '/demo/normalFrame.html');
-    document.querySelector('#frames').insertBefore(ifr, document.querySelector('#frames').firstChild);
+    var ifr = document.createElement('iframe');
+    ifr.setAttribute('courier-tags', 'all frame-' + Math.abs(Math.floor(Math.random() * 3)));
+    ifr.setAttribute('src', '../demo/courierFrame.html');
+    document.getElementById('frames').appendChild(ifr);
+  });
+  document.getElementById('addnormal').addEventListener('click', function ()
+  {
+    var ifr = document.createElement('iframe');
+    ifr.setAttribute('src', '../demo/normalFrame.html');
+    document.getElementById('frames').insertBefore(ifr, document.getElementById('frames').firstChild);
   });
 </script>
 </body>
