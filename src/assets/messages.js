@@ -70,7 +70,13 @@ export class Envelope
    */
   static fromString(str)
   {
-    return Object.assign(new this(), JSON.parse(str));
+    try
+    {
+      return Object.assign(new this(), JSON.parse(str));
+    }
+    catch(e)
+    {
+    }
   }
 
   toString()

@@ -99,6 +99,10 @@ export class Frame
     this._msgListener = (msg) =>
     {
       const envelope = Envelope.fromString(msg.data);
+      if(!envelope)
+      {
+        return;
+      }
       if(envelope.to === getId() && envelope.from === this.id)
       {
         const listeners = _listeners.get(envelope.event);

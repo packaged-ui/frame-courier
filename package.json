@@ -20,8 +20,8 @@
     "browserslist": "^4.16.0",
     "console-polyfill": "^0.3.0",
     "custom-event": "^1.0.1",
-    "custom-event-polyfill": "^1.0.7",
     "debounce": "^1.2.0",
+    "document-ready-promise": "^3.0.1",
     "hash-sum": "^2.0.0"
   },
   "devDependencies": {
