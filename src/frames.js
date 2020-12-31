@@ -48,7 +48,7 @@ function broadcast(event, payload, callback)
     });
 }
 
-if(window === window.top)
+if(_isTop())
 {
   setId('');
 
@@ -195,6 +195,18 @@ function _randomString()
 function _isWindow(obj)
 {
   return obj.window === obj;
+}
+
+function _isTop()
+{
+  try
+  {
+    return window.self === window.top;
+  }
+  catch(e)
+  {
+    return false;
+  }
 }
 
 export const FrameCourier = {
