@@ -75,7 +75,7 @@ if(_isTop())
         iframe.setAttribute('courier-id', 'frame-' + _randomString());
       }
       const frameId = iframe.getAttribute('courier-id');
-      const frameTags = iframe.getAttribute('courier-tags').split(/\s+/);
+      const frameTags = (iframe.getAttribute('courier-tags') || '').split(/\s+/);
 
       const frame = getFrame(frameId);
       if(((!frame) && msg.origin) || frame.origin === msg.origin)
