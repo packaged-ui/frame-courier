@@ -42,7 +42,6 @@ function broadcast(event, payload, callback)
   getAllFrames().forEach(
     frame =>
     {
-      console.log('broadcast', getId(), frame.id);
       if(frame.id !== getId())
       {
         frame.send(event, payload, callback);
