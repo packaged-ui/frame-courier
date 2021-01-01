@@ -27,7 +27,8 @@ export class Envelope
 {
   constructor(to, from, event, payload)
   {
-    this._messageId = event + ':' + hashSum(Date.now() + to + payload)
+    this._timestamp = Date.now();
+    this._messageId = event + ':' + hashSum(this._timestamp + to + payload)
     this._to = to;
     this._from = from;
     this._event = event;
@@ -37,6 +38,11 @@ export class Envelope
   get messageId()
   {
     return this._messageId;
+  }
+
+  get timestamp()
+  {
+    return this._timestamp;
   }
 
   get to()

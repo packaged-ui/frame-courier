@@ -50,26 +50,17 @@ export function addFrame(frame)
     console.warn('cannot add two frames with the same id');
     return;
   }
-  console.debug('established channel with', frame.id);
+  console.debug(_frameId, 'established channel with', frame.id);
   _frames.set(frame.id, frame);
   return frame;
 }
 
 /**
- * @param {String} id
- * @returns {Frame}
- */
-export function getFrame(id)
-{
-  return _frames.get(id);
-}
-
-/**
- * @returns {Frame[]}
+ * @returns {Map<String,Frame>}
  */
 export function getAllFrames()
 {
-  return Array.from(_frames.values());
+  return new Map(_frames);
 }
 
 export class Frame
@@ -144,7 +135,7 @@ export class Frame
 
     if(this._port)
     {
-      if(this._port === this._port.window)
+      if(this._port.self && this._port.self === this._port.window)
       {
         // only bind listener once, to window
         window.removeEventListener('message', this._msgListener);

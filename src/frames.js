@@ -1,5 +1,5 @@
 import CustomEvent from 'custom-event';
-import {addFrame, addListener, Frame, getAllFrames, getFrame, getId, getTags, setId, setTags} from './assets/frame';
+import {addFrame, addListener, Frame, getAllFrames, getId, getTags, setId, setTags} from './assets/frame';
 import {Envelope, events, NegotiationPayload} from "./assets/messages";
 import 'console-polyfill';
 import ready from 'document-ready-promise';
@@ -14,7 +14,7 @@ import ready from 'document-ready-promise';
  */
 function sendMessage(frameId, event, payload, callback)
 {
-  const frm = getFrame(frameId);
+  const frm = getAllFrames().get(frameId);
   if(frm)
   {
     frm.send(event, payload, callback);
@@ -42,6 +42,7 @@ function broadcast(event, payload, callback)
   getAllFrames().forEach(
     frame =>
     {
+      console.log('broadcast', getId(), frame.id);
       if(frame.id !== getId())
       {
         frame.send(event, payload, callback);
@@ -77,7 +78,7 @@ if(_isTop())
       const frameId = iframe.getAttribute('courier-id');
       const frameTags = (iframe.getAttribute('courier-tags') || '').split(/\s+/);
 
-      const frame = getFrame(frameId);
+      const frame = getAllFrames().get(frameId);
       if(((!frame) && msg.origin) || frame.origin === msg.origin)
       {
         let sendPort = msg.source;
@@ -107,6 +108,9 @@ if(_isTop())
 }
 else
 {
+  const _delayReady = [];
+  const _handshakes = new Map();
+
   // frame listens to setup
   window.addEventListener('message', (msg) =>
   {
@@ -127,49 +131,37 @@ else
       {
         setId(payload.frameId);
         setTags(payload.frameTags);
-        addFrame(new Frame('', [], msg.origin, msg.ports ? msg.ports[0] : msg.source));
-      }
+        addFrame(new Frame('', [], msg.origin, msg.ports && msg.ports.length ? msg.ports[0] : msg.source));
 
-      // we are now set up, send READY to all other top frames with our setup payload
-      for(let i = 0; i < window.top.frames.length; i++)
-      {
-        if(window.top.frames[i] !== window)
+        // play delayed ready messages
+        while(_delayReady.length > 0)
         {
-          const readyEnvelope = new Envelope('?', getId(), events.READY, payload);
-          window.top.frames[i].postMessage(readyEnvelope.toString(), '*');
+          _handleReady(...(_delayReady.shift()));
         }
-      }
 
-      ready().then(
-        () => document.dispatchEvent(new CustomEvent('frame-courier-ready', {detail: {frameId: getId()}}))
-      );
+        // we are now set up, send READY to all other top frames with our setup payload
+        for(let i = 0; i < window.top.frames.length; i++)
+        {
+          if(window.top.frames[i] !== window)
+          {
+            const readyEnvelope = new Envelope('?', getId(), events.READY, payload);
+            window.top.frames[i].postMessage(readyEnvelope.toString(), '*');
+          }
+        }
+
+        ready().then(
+          () => document.dispatchEvent(new CustomEvent('frame-courier-ready', {detail: {frameId: getId()}}))
+        );
+      }
     }
     if(envelope.event === events.READY)
     {
-      // got ready, create port, frame and handshake
-      const payload = NegotiationPayload.fromObject(envelope.payload);
-      if(payload.frameId && payload.frameTags && envelope.from === payload.frameId && envelope.to === '?')
+      if(getId())
       {
-        let sendPort = msg.source;
-        let recvPort = null;
-        if(window.MessageChannel)
-        {
-          const channel = new MessageChannel();
-          sendPort = channel.port1;
-          recvPort = channel.port2;
-        }
-        if(!_recoverFrame(payload.frameId, msg.origin, sendPort))
-        {
-          addFrame(new Frame(payload.frameId, payload.frameTags, msg.origin, sendPort));
-        }
-        const handshakeEnvelope = new Envelope(
-          payload.frameId,
-          getId(),
-          events.HANDSHAKE,
-          new NegotiationPayload(getId(), getTags())
-        )
-        msg.source.postMessage(handshakeEnvelope.toString(), msg.origin, [recvPort]);
+        return _handleReady(msg, envelope);
       }
+      // delay incoming ready events until we have an id
+      _delayReady.push([msg, envelope]);
     }
     if(envelope.event === events.HANDSHAKE)
     {
@@ -177,18 +169,68 @@ else
       const payload = NegotiationPayload.fromObject(envelope.payload);
       if(payload.frameId && payload.frameTags && envelope.from === payload.frameId)
       {
-        if(!_recoverFrame(payload.frameId, msg.origin, msg.ports ? msg.ports[0] : msg.source))
+        if(_handshakes.has(payload.frameId))
+        {
+          // received payload is older than our sent one, ignore it
+          if(envelope.timestamp < _handshakes.get(payload.frameId).timestamp)
+          {
+            return;
+          }
+        }
+        _handshakes.set(payload.frameId, envelope);
+
+        if(!_recoverFrame(payload.frameId, msg.origin, msg.ports && msg.ports.length ? msg.ports[0] : msg.source))
         {
           addFrame(new Frame(
             payload.frameId,
             payload.frameTags,
             msg.origin,
-            msg.ports ? msg.ports[0] : msg.source
+            msg.ports && msg.ports.length ? msg.ports[0] : msg.source
           ));
         }
       }
     }
   });
+
+  /**
+   * @param {MessageEvent} msg
+   * @param {Envelope} envelope
+   * @private
+   */
+  function _handleReady(msg, envelope)
+  {
+    // got ready, create port, frame and handshake
+    const payload = NegotiationPayload.fromObject(envelope.payload);
+    if(payload.frameId && payload.frameTags && envelope.from === payload.frameId && envelope.to === '?')
+    {
+      if(_handshakes.has(payload.frameId))
+      {
+        // already received a handshake, don't send a new one
+        return;
+      }
+      let sendPort = msg.source;
+      let recvPort = null;
+      if(window.MessageChannel)
+      {
+        const channel = new MessageChannel();
+        sendPort = channel.port1;
+        recvPort = channel.port2;
+      }
+      if(!_recoverFrame(payload.frameId, msg.origin, sendPort))
+      {
+        addFrame(new Frame(payload.frameId, payload.frameTags, msg.origin, sendPort));
+      }
+      const handshakeEnvelope = new Envelope(
+        payload.frameId,
+        getId(),
+        events.HANDSHAKE,
+        new NegotiationPayload(getId(), getTags())
+      );
+      _handshakes.set(payload.frameId, handshakeEnvelope);
+
+      msg.source.postMessage(handshakeEnvelope.toString(), msg.origin, [recvPort]);
+    }
+  }
 
   // send loaded message to top
   const envelope = new Envelope('', '?', events.LOADED, null);
@@ -197,10 +239,13 @@ else
 
 function _recoverFrame(id, origin, port)
 {
-  const existing = getFrame(id);
-  if(existing && existing.origin === origin)
+  const existing = getAllFrames().get(id);
+  if(existing)
   {
-    existing.setPort(port);
+    if(existing.origin === origin)
+    {
+      existing.setPort(port);
+    }
     return true;
   }
   return false;
@@ -231,10 +276,10 @@ function _isTop()
 export const FrameCourier = {
   send: sendMessage,
   sendToTag: sendMessageToTag,
-  broadcast,
+  broadcast: broadcast,
   id: getId,
   tags: getTags,
   listen: addListener,
   events: events,
-  frames: getAllFrames,
+  get frames() { return getAllFrames(); },
 };
