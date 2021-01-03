@@ -8,6 +8,10 @@ let _frameTags = [];
  * @private
  */
 const _frames = new Map();
+/**
+ * @type {Map<string, ListenerCallback[]>}
+ * @private
+ */
 const _listeners = new Map();
 
 /**
@@ -69,7 +73,7 @@ export class Frame
    * @param {String} id
    * @param {String[]} tags
    * @param {String} origin
-   * @param {MessagePort} port
+   * @param {MessagePort|Window} port
    */
   constructor(id, tags, origin, port)
   {
@@ -158,7 +162,7 @@ export class Frame
   /**
    * @param {String} event
    * @param {any} payload
-   * @param {Function?} callback
+   * @param {ListenerCallback?} callback
    */
   send(event, payload, callback)
   {
@@ -176,6 +180,24 @@ export class Frame
   }
 }
 
+/**
+ * @callback RespondCallback
+ * @param {any} payload
+ * @param {ListenerCallback} callback
+ */
+
+/**
+ * @callback ListenerCallback
+ * @param {any} payload
+ * @param {RespondCallback} respond
+ * @param {Envelope} envelope
+ * @param {MessageEvent} messageEvent
+ */
+
+/**
+ * @param {string} event
+ * @param {ListenerCallback} callback
+ */
 export function addListener(event, callback)
 {
   if(!_listeners.has(event))

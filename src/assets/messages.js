@@ -62,7 +62,7 @@ export class Envelope
 
   get responseEvent()
   {
-    return events.MESSAGE_RESPONSE + ':' + hashSum(this._messageId);
+    return events.MESSAGE_RESPONSE + ':' + hashSum(this.messageId);
   }
 
   get payload()
