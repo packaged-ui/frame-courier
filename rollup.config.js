@@ -6,9 +6,9 @@ import babel from '@rollup/plugin-babel';
 process.chdir(__dirname);
 
 const defaultCfg = {
-  input: './dist.js',
+  input: './demo/demo.js',
   output: {
-    file: './dist/frame-courier.min.js',
+    file: './demo/demo.min.js',
     name: 'FrameCourier',
     format: 'iife'
   },
