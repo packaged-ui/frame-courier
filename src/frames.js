@@ -201,11 +201,6 @@ else
     const payload = NegotiationPayload.fromObject(envelope.payload);
     if(payload.frameId && payload.frameTags && envelope.from === payload.frameId && envelope.to === '?')
     {
-      if(_handshakes.has(payload.frameId))
-      {
-        // already received a handshake, don't send a new one
-        return;
-      }
       let sendPort = msg.source;
       let recvPort = null;
       if(window.MessageChannel)
