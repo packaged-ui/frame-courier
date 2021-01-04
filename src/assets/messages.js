@@ -1,4 +1,5 @@
 import hashSum from "hash-sum";
+import 'current-script-polyfill';
 
 const _EVENT_PREFIX = '_frame_courier--';
 export const events = {
@@ -23,8 +24,15 @@ export class NegotiationPayload
   }
 }
 
+const _key = hashSum(document.currentScript.src);
+
 export class Envelope
 {
+  static scopeKey()
+  {
+    return _key;
+  }
+
   constructor(to, from, event, payload)
   {
     this._timestamp = Date.now();
@@ -33,6 +41,7 @@ export class Envelope
     this._from = from;
     this._event = event;
     this._payload = payload;
+    this._scope = Envelope.scopeKey();
   }
 
   get messageId()
@@ -68,6 +77,11 @@ export class Envelope
   get payload()
   {
     return this._payload;
+  }
+
+  scopeMatches()
+  {
+    return this._scope === Envelope.scopeKey();
   }
 
   /**

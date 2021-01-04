@@ -61,7 +61,7 @@ if(_isTop())
       return;
     }
     const envelope = Envelope.fromString(msg.data);
-    if(!envelope)
+    if(!envelope || !envelope.scopeMatches())
     {
       return;
     }
@@ -118,11 +118,10 @@ else
       return;
     }
     const envelope = Envelope.fromString(msg.data);
-    if(!envelope)
+    if(!envelope || !envelope.scopeMatches())
     {
       return;
     }
-
     if(envelope.event === events.SETUP && msg.source === window.top)
     {
       const payload = NegotiationPayload.fromObject(envelope.payload);

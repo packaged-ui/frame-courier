@@ -19,6 +19,7 @@
   "dependencies": {
     "browserslist": "^4.16.0",
     "console-polyfill": "^0.3.0",
+    "current-script-polyfill": "^1.0.0",
     "custom-event": "^1.0.1",
     "debounce": "^1.2.0",
     "document-ready-promise": "^3.0.1",
