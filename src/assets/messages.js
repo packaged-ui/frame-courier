@@ -79,11 +79,6 @@ export class Envelope
     return this._payload;
   }
 
-  scopeMatches()
-  {
-    return this._scope === Envelope.scopeKey();
-  }
-
   /**
    * @param str
    * @returns {Envelope}
@@ -92,7 +87,11 @@ export class Envelope
   {
     try
     {
-      return Object.assign(new this(), JSON.parse(str));
+      const obj = Object.assign(Object.create(this.prototype), JSON.parse(str));
+      if(obj._scope === Envelope.scopeKey())
+      {
+        return obj;
+      }
     }
     catch(e)
     {

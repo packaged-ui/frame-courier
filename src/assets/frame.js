@@ -94,7 +94,7 @@ export class Frame
     this._msgListener = (msg) =>
     {
       const envelope = Envelope.fromString(msg.data);
-      if(!envelope || !envelope.scopeMatches())
+      if(!envelope)
       {
         return;
       }

@@ -60,7 +60,7 @@ if(_isTop())
       return;
     }
     const envelope = Envelope.fromString(msg.data);
-    if(!envelope || !envelope.scopeMatches())
+    if(!envelope)
     {
       return;
     }
@@ -117,7 +117,7 @@ else
       return;
     }
     const envelope = Envelope.fromString(msg.data);
-    if(!envelope || !envelope.scopeMatches())
+    if(!envelope)
     {
       return;
     }
