@@ -1,6 +1,6 @@
 {
   "name": "@packaged-ui/frame-courier",
-  "version": "4.0.4",
+  "version": "4.0.5",
   "main": "index.js",
   "author": {
     "name": "Tom Kay",
@@ -9,6 +9,12 @@
   },
   "license": "MIT",
   "private": false,
+  "dependencies": {
+    "console-polyfill": "^0.3.0",
+    "current-script-polyfill": "^1.0.0",
+    "custom-event": "^1.0.1",
+    "hash-sum": "^2.0.0"
+  },
   "browserslist": [
     "defaults",
     "IE >= 9",
@@ -16,21 +22,13 @@
     "last 2 versions",
     "Firefox ESR"
   ],
-  "dependencies": {
-    "browserslist": "^4.16.0",
-    "console-polyfill": "^0.3.0",
-    "current-script-polyfill": "^1.0.0",
-    "custom-event": "^1.0.1",
-    "debounce": "^1.2.0",
-    "document-ready-promise": "^3.0.1",
-    "hash-sum": "^2.0.0"
-  },
   "devDependencies": {
     "@babel/core": "^7.11.1",
     "@babel/preset-env": "^7.11.0",
     "@rollup/plugin-babel": "^5.2.2",
     "@rollup/plugin-commonjs": "^17.0.0",
     "@rollup/plugin-node-resolve": "^11.0.1",
+    "browserslist": "^4.16.0",
     "core-js": "3",
     "rollup": "^2.35.1",
     "rollup-plugin-terser": "^7.0.2"

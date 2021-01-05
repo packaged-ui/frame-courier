@@ -2,7 +2,6 @@ import CustomEvent from 'custom-event';
 import {addFrame, addListener, Frame, getAllFrames, getId, getTags, setId, setTags} from './assets/frame';
 import {Envelope, events, NegotiationPayload} from "./assets/messages";
 import 'console-polyfill';
-import ready from 'document-ready-promise';
 
 /**
  * Send a message to a specific frame
@@ -147,9 +146,7 @@ else
           }
         }
 
-        ready().then(
-          () => document.dispatchEvent(new CustomEvent('frame-courier-ready', {detail: {frameId: getId()}}))
-        );
+        document.dispatchEvent(new CustomEvent('frame-courier-ready', {detail: {frameId: getId()}}));
       }
     }
     if(envelope.event === events.READY)
