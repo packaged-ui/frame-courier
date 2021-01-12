@@ -3,6 +3,32 @@ import {addFrame, addListener, Frame, getAllFrames, getId, getTags, setId, setTa
 import {Envelope, events, NegotiationPayload} from "./assets/messages";
 import 'console-polyfill';
 
+let _supportTransfer = true;
+try
+{
+  const m = new MessageChannel();
+  window.postMessage('test transferable', '/', [m.port1]);
+}
+catch(e)
+{
+  _supportTransfer = false;
+}
+
+function _tryPostMessageTransfer(target, message, origin, transfer)
+{
+  try
+  {
+    if(_supportTransfer && transfer)
+    {
+      return target.postMessage(message, origin, transfer);
+    }
+  }
+  catch(e)
+  {
+  }
+  return target.postMessage(message, origin);
+}
+
 /**
  * Send a message to a specific frame
  *
@@ -81,7 +107,7 @@ if(_isTop())
       {
         let sendPort = msg.source;
         let recvPort = null;
-        if(window.MessageChannel)
+        if(_supportTransfer)
         {
           const channel = new MessageChannel();
           sendPort = channel.port1;
@@ -97,7 +123,7 @@ if(_isTop())
           events.SETUP,
           new NegotiationPayload(frameId, frameTags)
         );
-        msg.source.postMessage(readyEnvelope.toString(), msg.origin, [recvPort]);
+        _tryPostMessageTransfer(msg.source, readyEnvelope.toString(), msg.origin, [recvPort]);
       }
     }
   });
@@ -200,7 +226,7 @@ else
     {
       let sendPort = msg.source;
       let recvPort = null;
-      if(window.MessageChannel)
+      if(_supportTransfer)
       {
         const channel = new MessageChannel();
         sendPort = channel.port1;
@@ -218,7 +244,7 @@ else
       );
       _handshakes.set(payload.frameId, handshakeEnvelope);
 
-      msg.source.postMessage(handshakeEnvelope.toString(), msg.origin, [recvPort]);
+      _tryPostMessageTransfer(msg.source, handshakeEnvelope.toString(), msg.origin, [recvPort]);
     }
   }
 

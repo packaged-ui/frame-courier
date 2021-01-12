@@ -15,8 +15,6 @@ const defaultCfg = {
   plugins: [
     resolve({browser: true, preferBuiltins: false}),
     commonjs(),
-    terser(),
-
     babel(
       {
         babelHelpers: 'bundled',
@@ -33,6 +31,7 @@ const defaultCfg = {
           ],
         ],
       }),
+    terser(),
   ]
 };
 
