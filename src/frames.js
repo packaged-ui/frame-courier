@@ -3,22 +3,30 @@ import {addFrame, addListener, Frame, getAllFrames, getId, getTags, setId, setTa
 import {Envelope, events, NegotiationPayload} from "./assets/messages";
 import 'console-polyfill';
 
-let _supportTransfer = true;
+let _useChannels = true;
 try
 {
-  const m = new MessageChannel();
-  window.postMessage('test transferable', '/', [m.port1]);
+  if(_useChannels)
+  {
+    const m = new MessageChannel();
+    window.postMessage('test transferable', '/', [m.port1]);
+  }
 }
 catch(e)
 {
-  _supportTransfer = false;
+  _useChannels = false;
+}
+
+export function disableChannels()
+{
+  _useChannels = false;
 }
 
 function _tryPostMessageTransfer(target, message, origin, transfer)
 {
   try
   {
-    if(_supportTransfer && transfer)
+    if(_useChannels && transfer)
     {
       return target.postMessage(message, origin, transfer);
     }
@@ -107,7 +115,7 @@ if(_isTop())
       {
         let sendPort = msg.source;
         let recvPort = null;
-        if(_supportTransfer)
+        if(_useChannels)
         {
           const channel = new MessageChannel();
           sendPort = channel.port1;
@@ -154,7 +162,7 @@ else
       {
         setId(payload.frameId);
         setTags(payload.frameTags);
-        addFrame(new Frame('', [], msg.origin, msg.ports && msg.ports.length ? msg.ports[0] : msg.source));
+        addFrame(new Frame('', [], msg.origin, _useChannels ? msg.ports[0] : msg.source));
 
         // play delayed ready messages
         while(_delayReady.length > 0)
@@ -200,13 +208,13 @@ else
         }
         _handshakes.set(payload.frameId, envelope);
 
-        if(!_recoverFrame(payload.frameId, msg.origin, msg.ports && msg.ports.length ? msg.ports[0] : msg.source))
+        if(!_recoverFrame(payload.frameId, msg.origin, _useChannels ? msg.ports[0] : msg.source))
         {
           addFrame(new Frame(
             payload.frameId,
             payload.frameTags,
             msg.origin,
-            msg.ports && msg.ports.length ? msg.ports[0] : msg.source
+            _useChannels ? msg.ports[0] : msg.source
           ));
         }
       }
@@ -226,7 +234,7 @@ else
     {
       let sendPort = msg.source;
       let recvPort = null;
-      if(_supportTransfer)
+      if(_useChannels)
       {
         const channel = new MessageChannel();
         sendPort = channel.port1;
@@ -274,7 +282,14 @@ function _randomString()
 
 function _isWindow(obj)
 {
-  return obj.window === obj;
+  try
+  {
+    return obj.window === obj;
+  }
+  catch(e)
+  {
+    return false;
+  }
 }
 
 function _isTop()

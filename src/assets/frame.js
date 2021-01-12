@@ -54,7 +54,7 @@ export function addFrame(frame)
     console.warn('cannot add two frames with the same id');
     return;
   }
-  console.debug(_frameId, 'established channel with', frame.id);
+  //console.debug(_frameId, 'established channel with', frame.id);
   _frames.set(frame.id, frame);
   return frame;
 }
@@ -131,7 +131,7 @@ export class Frame
 
   setPort(port)
   {
-    if(this._port && this._port.close)
+    if(this._port && !_isWindow(this._port))
     {
       this._port.close();
     }
@@ -139,7 +139,7 @@ export class Frame
 
     if(this._port)
     {
-      if(this._port.self && this._port.self === this._port.window)
+      if(_isWindow(this._port))
       {
         // only bind listener once, to window
         window.removeEventListener('message', this._msgListener);
@@ -150,12 +150,12 @@ export class Frame
         // bind listener to message port
         this._port.removeEventListener('message', this._msgListener);
         this._port.addEventListener('message', this._msgListener);
-      }
-    }
 
-    if(this._port.start)
-    {
-      this._port.start();
+        if(this._port.start)
+        {
+          this._port.start();
+        }
+      }
     }
   }
 
@@ -207,5 +207,17 @@ export function addListener(event, callback)
   else
   {
     _listeners.get(event).push(callback);
+  }
+}
+
+function _isWindow(obj)
+{
+  try
+  {
+    return obj.window === obj;
+  }
+  catch(e)
+  {
+    return false;
   }
 }
