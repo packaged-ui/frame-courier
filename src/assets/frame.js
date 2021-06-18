@@ -171,7 +171,7 @@ export class Frame
     {
       this.listen(envelope.responseEvent, callback)
     }
-    this._port.postMessage(envelope.toString(), this._port === this._port.window ? this.origin : null);
+    this._port.postMessage(envelope.toString(), _isWindow(this._port) ? this.origin : null);
   }
 
   listen(event, callback)
