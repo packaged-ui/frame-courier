@@ -114,6 +114,11 @@ if(_isTop())
       const frame = getAllFrames().get(frameId);
       if(((!frame) && msg.origin) || frame.origin === msg.origin)
       {
+        if(!_shouldReplacePort(frameId, envelope.timestamp))
+        {
+          return;
+        }
+
         let sendPort = msg.source;
         let recvPort = null;
         if(_useChannels)
@@ -126,12 +131,9 @@ if(_isTop())
         {
           addFrame(new Frame(frameId, frameTags, msg.origin, sendPort));
         }
-        const readyEnvelope = new Envelope(
-          frameId,
-          '',
-          events.SETUP,
-          new NegotiationPayload(frameId, frameTags)
-        );
+        const readyEnvelope = new Envelope(frameId, '', events.SETUP, new NegotiationPayload(frameId, frameTags));
+
+        _setPortTime(readyEnvelope.to, readyEnvelope.timestamp);
         _tryPostMessageTransfer(msg.source, readyEnvelope.toString(), msg.origin, [recvPort]);
       }
     }
@@ -142,7 +144,6 @@ if(_isTop())
 else
 {
   const _delayReady = [];
-  const _handshakes = new Map();
 
   // frame listens to setup
   window.addEventListener('message', (msg) =>
@@ -199,15 +200,10 @@ else
       const payload = NegotiationPayload.fromObject(envelope.payload);
       if(payload.frameId && payload.frameTags && envelope.from === payload.frameId)
       {
-        if(_handshakes.has(payload.frameId))
+        if(!_shouldReplacePort(envelope.from, envelope.timestamp))
         {
-          // received payload is older than our sent one, ignore it
-          if(envelope.timestamp < _handshakes.get(payload.frameId).timestamp)
-          {
-            return;
-          }
+          return;
         }
-        _handshakes.set(payload.frameId, envelope);
 
         if(!_recoverFrame(payload.frameId, msg.origin, _useChannels ? msg.ports[0] : msg.source))
         {
@@ -233,6 +229,11 @@ else
     const payload = NegotiationPayload.fromObject(envelope.payload);
     if(payload.frameId && payload.frameTags && envelope.from === payload.frameId && envelope.to === '?')
     {
+      if(!_shouldReplacePort(envelope.from, envelope.timestamp))
+      {
+        return;
+      }
+
       let sendPort = msg.source;
       let recvPort = null;
       if(_useChannels)
@@ -251,8 +252,8 @@ else
         events.HANDSHAKE,
         new NegotiationPayload(getId(), getTags())
       );
-      _handshakes.set(payload.frameId, handshakeEnvelope);
 
+      _setPortTime(handshakeEnvelope.to, handshakeEnvelope.timestamp);
       _tryPostMessageTransfer(msg.source, handshakeEnvelope.toString(), msg.origin, [recvPort]);
     }
   }
@@ -305,6 +306,36 @@ function _isTop()
   }
 }
 
+const _ports = new Map();
+
+function _shouldReplacePort(frameId, portCreatedTime)
+{
+  if(_ports.has(frameId))
+  {
+    const portTime = _ports.get(frameId);
+    if(portCreatedTime > portTime)
+    {
+      // older port wins
+      return false;
+    }
+
+    if(portCreatedTime === portTime && frameId > getId())
+    {
+      // earlier id (alphabetically) wins
+      return false;
+    }
+  }
+
+  _setPortTime(frameId, portCreatedTime);
+  return true;
+}
+
+function _setPortTime(frameId, portCreatedTime)
+{
+  _ports.set(frameId, portCreatedTime);
+}
+
+//noinspection JSUnusedGlobalSymbols
 export const FrameCourier = {
   send: sendMessage,
   sendToTag: sendMessageToTag,
