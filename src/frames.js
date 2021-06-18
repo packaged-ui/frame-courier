@@ -114,11 +114,6 @@ if(_isTop())
       const frame = getAllFrames().get(frameId);
       if(((!frame) && msg.origin) || frame.origin === msg.origin)
       {
-        if(!_shouldReplacePort(frameId, envelope.timestamp))
-        {
-          return;
-        }
-
         let sendPort = msg.source;
         let recvPort = null;
         if(_useChannels)
@@ -133,7 +128,6 @@ if(_isTop())
         }
         const readyEnvelope = new Envelope(frameId, '', events.SETUP, new NegotiationPayload(frameId, frameTags));
 
-        _setPortTime(readyEnvelope.to, readyEnvelope.timestamp);
         _tryPostMessageTransfer(msg.source, readyEnvelope.toString(), msg.origin, [recvPort]);
       }
     }
