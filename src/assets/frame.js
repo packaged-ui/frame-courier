@@ -161,8 +161,8 @@ export class Frame
 
   /**
    * @param {String} event
-   * @param {any} payload
-   * @param {ListenerCallback?} callback
+   * @param {any} [payload]
+   * @param {ListenerCallback} [callback]
    */
   send(event, payload, callback)
   {

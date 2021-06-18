@@ -17,6 +17,7 @@ catch(e)
   _useChannels = false;
 }
 
+//noinspection JSUnusedGlobalSymbols
 export function disableChannels()
 {
   _useChannels = false;
@@ -43,7 +44,7 @@ function _tryPostMessageTransfer(target, message, origin, transfer)
  * @param {String} frameId   ID of the frame to send the message to
  * @param {String} event
  * @param {any} [payload]      Will be serialized using JSON.stringify
- * @param {Function?}  [callback]
+ * @param {Function}  [callback]
  */
 function sendMessage(frameId, event, payload, callback)
 {
