@@ -307,7 +307,7 @@ function _shouldReplacePort(frameId, portCreatedTime)
   if(_ports.has(frameId))
   {
     const portTime = _ports.get(frameId);
-    if(portCreatedTime > portTime)
+    if(portCreatedTime < portTime)
     {
       // older port wins
       return false;
