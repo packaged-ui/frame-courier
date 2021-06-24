@@ -3,7 +3,9 @@ import {addFrame, addListener, Frame, getAllFrames, getId, getTags, setId, setTa
 import {Envelope, events, NegotiationPayload} from "./assets/messages";
 import 'console-polyfill';
 
-let _useChannels = true;
+const MessageChannel = window.MessageChannel || undefined;
+
+let _useChannels = !!MessageChannel;
 try
 {
   if(_useChannels)
@@ -116,7 +118,7 @@ if(_isTop())
       {
         let sendPort = msg.source;
         let recvPort = null;
-        if(_useChannels)
+        if(_useChannels && MessageChannel)
         {
           const channel = new MessageChannel();
           sendPort = channel.port1;
@@ -235,7 +237,7 @@ function _handleReady(msg, envelope)
 
     let sendPort = msg.source;
     let recvPort = null;
-    if(_useChannels)
+    if(_useChannels && MessageChannel)
     {
       const channel = new MessageChannel();
       sendPort = channel.port1;
