@@ -212,49 +212,49 @@ else
     }
   });
 
-  /**
-   * @param {MessageEvent} msg
-   * @param {Envelope} envelope
-   * @private
-   */
-  function _handleReady(msg, envelope)
-  {
-    // got ready, create port, frame and handshake
-    const payload = NegotiationPayload.fromObject(envelope.payload);
-    if(payload.frameId && payload.frameTags && envelope.from === payload.frameId && envelope.to === '?')
-    {
-      if(!_shouldReplacePort(envelope.from, envelope.timestamp))
-      {
-        return;
-      }
-
-      let sendPort = msg.source;
-      let recvPort = null;
-      if(_useChannels)
-      {
-        const channel = new MessageChannel();
-        sendPort = channel.port1;
-        recvPort = channel.port2;
-      }
-      if(!_recoverFrame(payload.frameId, msg.origin, sendPort))
-      {
-        addFrame(new Frame(payload.frameId, payload.frameTags, msg.origin, sendPort));
-      }
-      const handshakeEnvelope = new Envelope(
-        payload.frameId,
-        getId(),
-        events.HANDSHAKE,
-        new NegotiationPayload(getId(), getTags())
-      );
-
-      _setPortTime(handshakeEnvelope.to, handshakeEnvelope.timestamp);
-      _tryPostMessageTransfer(msg.source, handshakeEnvelope.toString(), msg.origin, [recvPort]);
-    }
-  }
-
   // send loaded message to top
   const envelope = new Envelope('', '?', events.LOADED, null);
   window.top.postMessage(envelope.toString(), '*');
+}
+
+/**
+ * @param {MessageEvent} msg
+ * @param {Envelope} envelope
+ * @private
+ */
+function _handleReady(msg, envelope)
+{
+  // got ready, create port, frame and handshake
+  const payload = NegotiationPayload.fromObject(envelope.payload);
+  if(payload.frameId && payload.frameTags && envelope.from === payload.frameId && envelope.to === '?')
+  {
+    if(!_shouldReplacePort(envelope.from, envelope.timestamp))
+    {
+      return;
+    }
+
+    let sendPort = msg.source;
+    let recvPort = null;
+    if(_useChannels)
+    {
+      const channel = new MessageChannel();
+      sendPort = channel.port1;
+      recvPort = channel.port2;
+    }
+    if(!_recoverFrame(payload.frameId, msg.origin, sendPort))
+    {
+      addFrame(new Frame(payload.frameId, payload.frameTags, msg.origin, sendPort));
+    }
+    const handshakeEnvelope = new Envelope(
+      payload.frameId,
+      getId(),
+      events.HANDSHAKE,
+      new NegotiationPayload(getId(), getTags())
+    );
+
+    _setPortTime(handshakeEnvelope.to, handshakeEnvelope.timestamp);
+    _tryPostMessageTransfer(msg.source, handshakeEnvelope.toString(), msg.origin, [recvPort]);
+  }
 }
 
 function _recoverFrame(id, origin, port)
