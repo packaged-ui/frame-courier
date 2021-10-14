@@ -1,6 +1,6 @@
 import CustomEvent from 'custom-event';
-import {addFrame, addListener, Frame, getAllFrames, getId, getTags, setId, setTags} from './assets/frame';
-import {Envelope, events, NegotiationPayload} from "./assets/messages";
+import {addFrame, addListener, Frame, getAllFrames, getId, getTags, setId, setTags} from './assets/frame.js';
+import {Envelope, events, NegotiationPayload} from './assets/messages.js';
 import 'console-polyfill';
 
 const MessageChannel = window.MessageChannel || undefined;
@@ -207,7 +207,7 @@ else
             payload.frameId,
             payload.frameTags,
             msg.origin,
-            _useChannels ? msg.ports[0] : msg.source
+            _useChannels ? msg.ports[0] : msg.source,
           ));
         }
       }
@@ -251,7 +251,7 @@ function _handleReady(msg, envelope)
       payload.frameId,
       getId(),
       events.HANDSHAKE,
-      new NegotiationPayload(getId(), getTags())
+      new NegotiationPayload(getId(), getTags()),
     );
 
     _setPortTime(handshakeEnvelope.to, handshakeEnvelope.timestamp);

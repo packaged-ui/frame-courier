@@ -1,4 +1,4 @@
-import hashSum from "hash-sum";
+import hashSum from 'hash-sum';
 import 'current-script-polyfill';
 
 const _EVENT_PREFIX = '_frame_courier--';
@@ -36,7 +36,7 @@ export class Envelope
   constructor(to, from, event, payload)
   {
     this._timestamp = Date.now();
-    this._messageId = event + ':' + hashSum(this._timestamp + to + payload)
+    this._messageId = event + ':' + hashSum(this._timestamp + to + payload);
     this._to = to;
     this._from = from;
     this._event = event;

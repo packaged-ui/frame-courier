@@ -1,4 +1,4 @@
-import {Envelope} from "./messages";
+import {Envelope} from './messages.js';
 
 let _frameId = null;
 let _frameTags = [];
@@ -84,7 +84,7 @@ export class Frame
     }
     else if(!Array.isArray(tags))
     {
-      console.warn('invalid tags for frame', {id, tags})
+      console.warn('invalid tags for frame', {id, tags});
       tags = [];
     }
 
@@ -169,9 +169,9 @@ export class Frame
     const envelope = new Envelope(this.id, _frameId, event, payload);
     if(callback)
     {
-      this.listen(envelope.responseEvent, callback)
+      this.listen(envelope.responseEvent, callback);
     }
-    this._port.postMessage(envelope.toString(), _isWindow(this._port) ? this.origin : null);
+    this._port.postMessage(envelope.toString(), _isWindow(this._port) ? this.origin : undefined);
   }
 
   listen(event, callback)
